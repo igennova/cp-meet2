@@ -2,7 +2,7 @@ import React from "react";
 
 const Navbar = () => {
   return (
-    <nav class="bg-white border border-gray-200 py-2.5 dark:bg-gray-900">
+    <nav class="bg-black border border-gray-200 py-2.5 dark:bg-gray-900">
       <div class="flex flex-wrap items-center justify-between max-w-screen-xl px-4 mx-auto">
         <a href="#" class="flex items-center">
           <svg
@@ -21,7 +21,7 @@ const Navbar = () => {
             />
           </svg>
 
-          <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+          <span class="self-center text-xl font-semibold whitespace-nowrap">
             CP Buddy
           </span>
         </a>
