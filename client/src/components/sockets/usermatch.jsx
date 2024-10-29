@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 const socket = io("http://localhost:5000");
 
@@ -8,17 +8,19 @@ const Matchmaking = () => {
 
   useEffect(() => {
     // Join the matchmaking queue when the component mounts
-    socket.emit('joinQueue');
+    socket.emit("joinQueue");
 
     // Listen for matchFound event
-    socket.on('matchFound', ({ roomId, opponentId }) => {
-      alert(`You have been matched with user: ${opponentId} in room: ${roomId}`);
+    socket.on("matchFound", ({ roomId, opponentId }) => {
+      alert(
+        `You have been matched with user: ${opponentId} in room: ${roomId}`
+      );
       setIsMatched(true); // Update state to indicate match found
     });
 
     // Cleanup on unmount
     return () => {
-      socket.off('matchFound'); // Remove the event listener
+      socket.off("matchFound"); // Remove the event listener
     };
   }, []);
 
