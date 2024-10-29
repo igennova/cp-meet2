@@ -25,7 +25,7 @@ const Matchmaking = () => {
   }, []);
 
   return (
-    <div>
+    <div className="p-5">
       {isMatched ? ( // Conditional rendering based on isMatched state
         <h1>Done! You are matched!</h1>
       ) : (
