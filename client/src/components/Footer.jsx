@@ -3,18 +3,18 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer class="w-full">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="py-10 flex justify-between items-center flex-col gap-8 xl:flex-row">
-          <div class="flex items-center flex-col xl:flex-row ">
-            <a href="#" class="flex justify-center mb-8 xl:mb-0">
+    <footer className="w-full">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="py-10 flex justify-between items-center flex-col gap-8 xl:flex-row">
+          <div className="flex items-center flex-col xl:flex-row ">
+            <a href="#" className="flex justify-center mb-8 xl:mb-0">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-40 h-8"
+                className="w-40 h-8"
               >
                 <path
                   stroke-linecap="round"
@@ -22,45 +22,45 @@ const Footer = () => {
                   d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
                 />
               </svg>
-              <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+              <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
                 CP Buddy
               </span>
             </a>
-            <ul class="text-lg  flex items-center flex-col md:flex-row  py-8 gap-6 md:gap-12 xl:border-l border-gray-200 xl:ml-11 xl:pl-11 transition-all duration-500">
+            <ul className="text-lg  flex items-center flex-col md:flex-row  py-8 gap-6 md:gap-12 xl:border-l border-gray-200 xl:ml-11 xl:pl-11 transition-all duration-500">
               <li>
-                <a href="#" class="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-800 hover:text-indigo-600">
                   CP Buddy
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-800 hover:text-indigo-600">
                   Products
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-800 hover:text-indigo-600">
                   Resources
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-800 hover:text-indigo-600">
                   Blog
                 </a>
               </li>
               <li>
-                <a href="#" class="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-800 hover:text-indigo-600">
                   Support
                 </a>
               </li>
             </ul>
           </div>
-          <div class="flex  space-x-4 sm:justify-center  ">
+          <div className="flex  space-x-4 sm:justify-center  ">
             {/* <a
               href="#"
-              class="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500 hover:border-indigo-600"
+              className="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500 hover:border-indigo-600"
             >
               <svg
-                class="text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
+                className="text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
                 height="20"
@@ -78,10 +78,10 @@ const Footer = () => {
             </a>
             <a
               href="#"
-              class="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500  hover:border-indigo-600"
+              className="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500  hover:border-indigo-600"
             >
               <svg
-                class="w-[1.25rem] h-[1.125rem] text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
+                className="w-[1.25rem] h-[1.125rem] text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
                 viewBox="0 0 15 15"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -94,10 +94,10 @@ const Footer = () => {
             </a>
             <a
               href="#"
-              class="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500  hover:border-indigo-600"
+              className="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500  hover:border-indigo-600"
             >
               <svg
-                class="w-[1rem] h-[1rem] text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
+                className="w-[1rem] h-[1rem] text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
                 viewBox="0 0 13 12"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -110,10 +110,10 @@ const Footer = () => {
             </a>
             <a
               href="#"
-              class="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500  hover:border-indigo-600"
+              className="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500  hover:border-indigo-600"
             >
               <svg
-                class="w-[1.25rem] h-[0.875rem] text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
+                className="w-[1.25rem] h-[0.875rem] text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
                 viewBox="0 0 16 12"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +128,7 @@ const Footer = () => {
             </a> */}
             <a
               href="https://github.com/devSuryansh/cp-meet"
-              class="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500 hover:border-gray"
+              className="group w-9 h-9 rounded-full border border-gray-300 flex justify-center items-center transition-all duration-500 hover:border-gray"
             >
               <svg
                 className="text-gray-700 transition-all duration-500  group-hover:text-indigo-600"
