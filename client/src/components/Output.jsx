@@ -41,7 +41,7 @@ const Output = ({ editorRef, language }) => {
         isLoading={isLoading}
         onClick={runCode}
       >
-        Run Code
+        Submit
       </Button>
       <Box
         height="75vh"
