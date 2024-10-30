@@ -3,7 +3,7 @@ import Question from "../Models/question.js";
 const getRandomQuestion = async (req, res) => {
   try {
     const randomQuestion = await Question.aggregate([{ $sample: { size: 1 } }]);
-    
+
     if (randomQuestion.length) {
       res.json(randomQuestion[0]);
     } else {

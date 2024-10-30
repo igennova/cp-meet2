@@ -1,13 +1,13 @@
-import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
-import cors from 'cors';
-import questionRoutes from "./Routes/questionRoutes.js"
-import mongoose from 'mongoose';
-import * as dotenv from 'dotenv';
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
+import questionRoutes from "./Routes/questionRoutes.js";
+import mongoose from "mongoose";
+import * as dotenv from "dotenv";
 const app = express();
 const server = http.createServer(app);
-dotenv.config()
+dotenv.config();
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000", // your frontend URL
@@ -17,7 +17,6 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 5000;
 app.use(cors());
-
 
 let queue = []; // This will hold the users waiting in the queue
 let activeRooms = {}; // Track active rooms and their users
@@ -78,11 +77,12 @@ io.on("connection", (socket) => {
   });
 });
 
-mongoose.connect(process.env.MONGODB_URL)
+mongoose
+  .connect(process.env.MONGODB_URL)
   .then(() => console.log("DB Connected"))
   .catch((error) => console.error("Connection error:", error));
 
 server.listen(PORT, () => {
   console.log(`Server has started on http://localhost:${PORT}`);
 });
-app.use('/api', questionRoutes);
+app.use("/api", questionRoutes);

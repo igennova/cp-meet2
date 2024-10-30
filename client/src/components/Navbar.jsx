@@ -2,7 +2,6 @@ import React from "react";
 
 const Navbar = () => {
   return (
-
     <nav className="bg-black border border-gray-200 py-2.5 dark:bg-gray-900">
       <div className="flex flex-wrap items-center justify-between max-w-screen-xl px-4 mx-auto">
         <a href="#" className="flex items-center">
@@ -21,7 +20,6 @@ const Navbar = () => {
               d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
             />
           </svg>
-
 
           <span className="self-center text-xl font-semibold whitespace-nowrap">
             CP Buddy
