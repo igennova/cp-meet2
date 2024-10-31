@@ -9,6 +9,11 @@ export const LANGUAGE_VERSIONS = {
   typescript: "5.0.3",
 };
 
+export const language_id = {
+  "c++": 105,
+  python: 100,
+};
+
 export const CODE_SNIPPETS = {
   "c++": "",
   java: `public class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello World");\n\t}\n}\n`,

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { questionroute } from '@/api/ApiRoutes';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { questionroute } from "@/api/ApiRoutes";
 
 const RandomQuestion = () => {
   const [question, setQuestion] = useState(null);
@@ -34,9 +34,15 @@ const RandomQuestion = () => {
         <div>
           <h3>{question.title}</h3>
           <p>{question.description}</p>
-          <pre>Sample Input: {JSON.stringify(question.input_format, null, 2)}</pre>
-          <pre>Sample Output: {JSON.stringify(question.output_format, null, 2)}</pre>
-          <pre>Constraints: {JSON.stringify(question.constraints, null, 2)}</pre>
+          <pre>
+            Sample Input: {JSON.stringify(question.input_format, null, 2)}
+          </pre>
+          <pre>
+            Sample Output: {JSON.stringify(question.output_format, null, 2)}
+          </pre>
+          <pre>
+            Constraints: {JSON.stringify(question.constraints, null, 2)}
+          </pre>
         </div>
       ) : (
         <p>Loading...</p>

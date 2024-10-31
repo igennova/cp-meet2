@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Box, Button, Text, useToast } from "@chakra-ui/react";
 import { executeCode } from "../api";
+import axios from "axios";
+import { getroute, questionroute } from "@/api/ApiRoutes";
+import { language_id } from "@/constants";
 
 const Output = ({ editorRef, language }) => {
   const toast = useToast();
@@ -11,6 +14,25 @@ const Output = ({ editorRef, language }) => {
   const runCode = async () => {
     const sourceCode = editorRef.current.getValue();
     if (!sourceCode) return;
+
+    const languageID = language_id[language];
+
+    const response = await axios.get(questionroute);
+    const question_id = response.data.question_id;
+
+    axios
+      .post(getroute, {
+        question_id,
+        sourceCode,
+        languageID,
+      })
+      .then((response) => {
+        console.log("Response from backend:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+
     try {
       setIsLoading(true);
       const { run: result } = await executeCode(language, sourceCode);
@@ -41,7 +63,7 @@ const Output = ({ editorRef, language }) => {
         isLoading={isLoading}
         onClick={runCode}
       >
-        Run Code
+        Submit
       </Button>
       <Box
         height="75vh"

@@ -9,7 +9,7 @@ import coderoutes from "./Routes/judgeRoutes.js"
 const app = express();
 app.use(express.json());
 const server = http.createServer(app);
-dotenv.config()
+dotenv.config();
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000", // your frontend URL
@@ -19,7 +19,6 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 5000;
 app.use(cors());
-
 
 let queue = []; // This will hold the users waiting in the queue
 let activeRooms = {}; // Track active rooms and their users
@@ -80,7 +79,8 @@ io.on("connection", (socket) => {
   });
 });
 
-mongoose.connect(process.env.MONGODB_URL)
+mongoose
+  .connect(process.env.MONGODB_URL)
   .then(() => console.log("DB Connected"))
   .catch((error) => console.error("Connection error:", error));
 
