@@ -1,7 +1,7 @@
 import Question from "../Models/question.js"; // Adjust path if needed
 import fetch from "node-fetch"; // Ensure you have this package installed
 import * as dotenv from "dotenv";
-dotenv.config()
+dotenv.config();
 
 // const arr = {
 //     "C++ (GCC 14.1.0)": 105,
