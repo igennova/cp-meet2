@@ -9,7 +9,7 @@ export const LANGUAGE_VERSIONS = {
   typescript: "5.0.3",
 };
 
-export const language_id = {
+export const language_ID = {
   "c++": 105,
   python: 100,
 };

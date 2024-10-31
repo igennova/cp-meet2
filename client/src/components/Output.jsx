@@ -3,7 +3,7 @@ import { Box, Button, Text, useToast } from "@chakra-ui/react";
 import { executeCode } from "../api";
 import axios from "axios";
 import { getroute, questionroute } from "@/api/ApiRoutes";
-import { language_id } from "@/constants";
+import { language_ID } from "@/constants";
 
 const Output = ({ editorRef, language }) => {
   const toast = useToast();
@@ -12,19 +12,18 @@ const Output = ({ editorRef, language }) => {
   const [isError, setIsError] = useState(false);
 
   const runCode = async () => {
-    const sourceCode = editorRef.current.getValue();
-    if (!sourceCode) return;
+    const source_code = editorRef.current.getValue();
+    if (!source_code) return;
 
-    const languageID = language_id[language];
+    const language_id = language_ID[language];
 
     const response = await axios.get(questionroute);
-    const question_id = response.data.question_id;
-
-    axios
+    const problem_id = response.data.question_id;
+      axios
       .post(getroute, {
-        question_id,
-        sourceCode,
-        languageID,
+        problem_id,      
+        source_code,     
+        language_id     
       })
       .then((response) => {
         console.log("Response from backend:", response.data);
@@ -32,10 +31,9 @@ const Output = ({ editorRef, language }) => {
       .catch((error) => {
         console.error("Error:", error);
       });
-
     try {
       setIsLoading(true);
-      const { run: result } = await executeCode(language, sourceCode);
+      const { run: result } = await executeCode(language, source_code);
       setOutput(result.output.split("\n"));
       result.stderr ? setIsError(true) : setIsError(false);
     } catch (error) {

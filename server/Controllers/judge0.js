@@ -1,5 +1,7 @@
 import Question from "../Models/question.js"; // Adjust path if needed
 import fetch from "node-fetch"; // Ensure you have this package installed
+import * as dotenv from "dotenv";
+dotenv.config()
 
 // const arr = {
 //     "C++ (GCC 14.1.0)": 105,
@@ -55,7 +57,7 @@ const submitCodeAndCheckResult = async (submission) => {
   const options = {
     method: "POST",
     headers: {
-      "x-rapidapi-key": "e76f87b709msh746dbe80f215db2p16d699jsn9357eec67572",
+      "x-rapidapi-key": process.env.JUDGE_KEY,
       "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
       "Content-Type": "application/json",
     },
@@ -86,7 +88,7 @@ const checkSubmissionResult = async (submissionId) => {
   const options = {
     method: "GET",
     headers: {
-      "x-rapidapi-key": "e76f87b709msh746dbe80f215db2p16d699jsn9357eec67572",
+      "x-rapidapi-key": process.env.JUDGE_KEY,
       "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
     },
   };
