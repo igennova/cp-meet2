@@ -1,11 +1,13 @@
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import cors from "cors";
-import questionRoutes from "./Routes/questionRoutes.js";
-import mongoose from "mongoose";
-import * as dotenv from "dotenv";
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import questionRoutes from "./Routes/questionRoutes.js"
+import mongoose from 'mongoose';
+import * as dotenv from 'dotenv';
+import coderoutes from "./Routes/judgeRoutes.js"
 const app = express();
+app.use(express.json());
 const server = http.createServer(app);
 dotenv.config();
 const io = new Server(server, {
@@ -85,4 +87,5 @@ mongoose
 server.listen(PORT, () => {
   console.log(`Server has started on http://localhost:${PORT}`);
 });
-app.use("/api", questionRoutes);
+app.use('/api', questionRoutes);
+app.use("/api",coderoutes)
