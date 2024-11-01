@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { questionroute } from "@/api/ApiRoutes";
+import { getroute, questionroute } from "@/api/ApiRoutes";
 import { Box, Text, Button } from "@chakra-ui/react";
+import { language_ID } from "@/constants";
 
-const RandomQuestion = () => {
+const RandomQuestion = ({editorRef, language}) => {
   const [question, setQuestion] = useState(null);
   const [error, setError] = useState(null);
 
@@ -27,6 +28,28 @@ const RandomQuestion = () => {
   if (error) {
     return <div>{error}</div>;
   }
+
+  const runCode = async () => {
+    const source_code = editorRef.current.getValue();
+    if (!source_code) return;
+
+    const language_id = language_ID[language];
+
+    const response = await axios.get(questionroute);
+    const problem_id = response.data.question_id;
+    axios
+      .post(getroute, {
+        problem_id,
+        source_code,
+        language_id,
+      })
+      .then((response) => {
+        console.log("Response from backend:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
   return (
     // <div>
@@ -58,7 +81,7 @@ const RandomQuestion = () => {
         colorScheme="green"
         mb={4}
         // isLoading={isLoading}
-        // onClick={runCode}
+        onClick={runCode}
       >
         Submit
       </Button>

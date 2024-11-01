@@ -25,7 +25,7 @@ const CodeEditor = () => {
     <Box>
       <HStack spacing={4}>
         {/* <Output editorRef={editorRef} language={language} /> */}
-        <RandomQuestion />
+        <RandomQuestion editorRef={editorRef} language={language} />
         <Box w="50%">
           <LanguageSelector language={language} onSelect={onSelect} />
           <Editor
