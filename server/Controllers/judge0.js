@@ -26,16 +26,22 @@ const getcode = async (req, res) => {
       return res.status(404).json({ message: "Problem not found" });
     }
 
-    // Prepare submissions for Judge0
+    // Prepare submissions and expected outputs
     const submissions = problemData.test_cases.map((testCase) => ({
       language_id,
       source_code: Buffer.from(source_code).toString("base64"),
       stdin: Buffer.from(testCase.input.join("\n")).toString("base64"),
     }));
 
+    // Store expected outputs for later comparison
+    const expectedOutputs = problemData.test_cases.map((testCase) => testCase.expected_output);
+    console.log(expectedOutputs)
+
     // Submit each test case to Judge0 and check the result
     const results = await Promise.all(
-      submissions.map((submission) => submitCodeAndCheckResult(submission))
+      submissions.map((submission, index) =>
+        submitCodeAndCheckResult(submission, expectedOutputs[index])
+      )
     );
 
     // Send back the results
@@ -49,8 +55,8 @@ const getcode = async (req, res) => {
   }
 };
 
-// Function to submit code and check the result
-const submitCodeAndCheckResult = async (submission) => {
+// Modify submitCodeAndCheckResult to accept expectedOutput for comparison
+const submitCodeAndCheckResult = async (submission, expectedOutput) => {
   const url =
     "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&fields=*";
 
@@ -72,17 +78,16 @@ const submitCodeAndCheckResult = async (submission) => {
     // Extract submission ID
     const submissionId = submissionData.token;
 
-    // Check the submission result
-    return await checkSubmissionResult(submissionId);
+    // Check the submission result and compare it with the expected output
+    return await checkSubmissionResult(submissionId, expectedOutput);
   } catch (error) {
     console.error("Error submitting code:", error);
     return { error: "Error submitting code" };
   }
 };
 
-// Function to check the result of the submission
-// Function to check the result of the submission
-const checkSubmissionResult = async (submissionId) => {
+// Modify checkSubmissionResult to accept expectedOutput for comparison
+const checkSubmissionResult = async (submissionId, expectedOutput) => {
   const resultUrl = `https://judge0-ce.p.rapidapi.com/submissions/${submissionId}?base64_encoded=true&fields=*`;
 
   const options = {
@@ -102,43 +107,44 @@ const checkSubmissionResult = async (submissionId) => {
 
       const statusId = resultData.status.id;
 
-      // Break the loop if a final state is reached
       if (statusId === 3) {
-        // Accepted
-        console.log("Accepted:", resultData);
+        // Compare Judge0 output with expected output
+        const decodedOutput = atob(resultData.stdout).trim();
+    
+        // Trim the expected output as well
+        const trimmedExpectedOutput = expectedOutput.trim();
+    
+        // Compare Judge0 output with expected output
+        const isCorrect = decodedOutput === trimmedExpectedOutput;
+        console.log(isCorrect ? "Correct" : "Wrong");
+        console.log("Expected Output:", trimmedExpectedOutput);
+        console.log("Judge0 Output:", decodedOutput);
+    
         return {
-          status: "Accepted",
-          output: resultData.stdout,
+            status: isCorrect ? "Right Answer" : "Wrong Answer",
+            output: decodedOutput,
+            expected_output: trimmedExpectedOutput,
         };
       } else if (statusId === 5) {
-        // Wrong Answer
-        console.log("Wrong Answer:", resultData);
         return {
           status: "Wrong Answer",
-          expected_output: resultData.expected_output,
+          expected_output: expectedOutput,
           your_output: resultData.stdout,
         };
       } else if (statusId === 6) {
-        // Time Limit Exceeded
-        console.log("Time Limit Exceeded:", resultData);
         return { status: "Time Limit Exceeded" };
       } else if (statusId >= 7) {
-        // Other errors
-        console.log(
-          "Submission failed with status:",
-          resultData.status.description
-        );
         return { status: "Error", description: resultData.status.description };
       }
 
       // If still in queue or running, wait and retry
-      console.log("Submission is still in queue or running...");
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Shorten delay to 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   } catch (error) {
     console.error("Error checking submission result:", error);
     return { error: "Error checking submission result" };
   }
 };
+
 
 export default getcode;

@@ -23,6 +23,20 @@ const getAllQuestions = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+const getQuestionById = async (req, res) => {
+  try {
+    const problemId = 3; // Specify the problem ID here
+    const question = await Question.findOne({ question_id: problemId });
+
+    if (question) {
+      res.json(question);
+    } else {
+      res.status(404).json({ message: "Question not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
 
 // Export multiple functions
-export default getRandomQuestion;
+export default getQuestionById;
