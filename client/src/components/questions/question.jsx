@@ -4,7 +4,7 @@ import { getroute, questionroute } from "@/api/ApiRoutes";
 import { Box, Text, Button } from "@chakra-ui/react";
 import { language_ID } from "@/constants";
 
-const RandomQuestion = ({editorRef, language}) => {
+const RandomQuestion = ({ editorRef, language }) => {
   const [question, setQuestion] = useState(null);
   const [error, setError] = useState(null);
 

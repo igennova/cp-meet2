@@ -34,8 +34,10 @@ const getcode = async (req, res) => {
     }));
 
     // Store expected outputs for later comparison
-    const expectedOutputs = problemData.test_cases.map((testCase) => testCase.expected_output);
-    console.log(expectedOutputs)
+    const expectedOutputs = problemData.test_cases.map(
+      (testCase) => testCase.expected_output
+    );
+    console.log(expectedOutputs);
 
     // Submit each test case to Judge0 and check the result
     const results = await Promise.all(
@@ -110,20 +112,20 @@ const checkSubmissionResult = async (submissionId, expectedOutput) => {
       if (statusId === 3) {
         // Compare Judge0 output with expected output
         const decodedOutput = atob(resultData.stdout).trim();
-    
+
         // Trim the expected output as well
         const trimmedExpectedOutput = expectedOutput.trim();
-    
+
         // Compare Judge0 output with expected output
         const isCorrect = decodedOutput === trimmedExpectedOutput;
         console.log(isCorrect ? "Correct" : "Wrong");
         console.log("Expected Output:", trimmedExpectedOutput);
         console.log("Judge0 Output:", decodedOutput);
-    
+
         return {
-            status: isCorrect ? "Right Answer" : "Wrong Answer",
-            output: decodedOutput,
-            expected_output: trimmedExpectedOutput,
+          status: isCorrect ? "Right Answer" : "Wrong Answer",
+          output: decodedOutput,
+          expected_output: trimmedExpectedOutput,
         };
       } else if (statusId === 5) {
         return {
@@ -145,6 +147,5 @@ const checkSubmissionResult = async (submissionId, expectedOutput) => {
     return { error: "Error checking submission result" };
   }
 };
-
 
 export default getcode;
