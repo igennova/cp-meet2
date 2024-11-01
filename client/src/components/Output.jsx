@@ -19,11 +19,11 @@ const Output = ({ editorRef, language }) => {
 
     const response = await axios.get(questionroute);
     const problem_id = response.data.question_id;
-      axios
+    axios
       .post(getroute, {
-        problem_id,      
-        source_code,     
-        language_id     
+        problem_id,
+        source_code,
+        language_id,
       })
       .then((response) => {
         console.log("Response from backend:", response.data);
