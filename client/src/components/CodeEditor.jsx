@@ -4,6 +4,7 @@ import { Editor } from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
 import { CODE_SNIPPETS } from "../constants";
 import Output from "./Output";
+import RandomQuestion from "./questions/question";
 
 const CodeEditor = () => {
   const editorRef = useRef();
@@ -17,12 +18,14 @@ const CodeEditor = () => {
 
   const onSelect = (language) => {
     setLanguage(language);
-    setValue(CODE_SNIPPETS[language]);
+    // setValue(CODE_SNIPPETS[language]);
   };
 
   return (
     <Box>
       <HStack spacing={4}>
+        {/* <Output editorRef={editorRef} language={language} /> */}
+        <RandomQuestion />
         <Box w="50%">
           <LanguageSelector language={language} onSelect={onSelect} />
           <Editor
@@ -34,13 +37,12 @@ const CodeEditor = () => {
             height="75vh"
             theme="vs-dark"
             language={language}
-            defaultValue={CODE_SNIPPETS[language]}
+            // defaultValue={CODE_SNIPPETS[language]}
             onMount={onMount}
             value={value}
             onChange={(value) => setValue(value)}
           />
         </Box>
-        <Output editorRef={editorRef} language={language} />
       </HStack>
     </Box>
   );

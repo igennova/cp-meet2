@@ -28,27 +28,27 @@ const Footer = () => {
             </a>
             <ul className="text-lg  flex items-center flex-col md:flex-row  py-8 gap-6 md:gap-12 xl:border-l border-gray-200 xl:ml-11 xl:pl-11 transition-all duration-500">
               <li>
-                <a href="#" className="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-600 hover:text-indigo-600">
                   CP Buddy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-600 hover:text-indigo-600">
                   Products
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-600 hover:text-indigo-600">
                   Resources
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-600 hover:text-indigo-600">
                   Blog
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-800 hover:text-indigo-600">
+                <a href="#" className="text-gray-600 hover:text-indigo-600">
                   Support
                 </a>
               </li>
