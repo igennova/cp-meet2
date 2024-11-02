@@ -1,38 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { Button } from "@chakra-ui/react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+// import { InputPage } from "@/components";
 
 const socket = io("http://localhost:5000");
 
-const Matchmaking = () => {
-  const [name, setName] = useState(""); // State to hold the user's name
-  const [isMatched, setIsMatched] = useState(false); // State to track if matched
+const Matchmaking = ({ name, setName, onMatchFound }) => {
   const [isInQueue, setIsInQueue] = useState(false); // State to track if user has joined the queue
 
   useEffect(() => {
     // Listen for matchFound event
     socket.on("matchFound", ({ roomId, opponentName }) => {
       alert(`You have been matched with ${opponentName}`);
-      setIsMatched(true); // Update state to indicate match found
-    });
-
-    // Listen for error messages
-    socket.on("error", (message) => {
-      alert(message); // Show error to user
+      onMatchFound(); // Call the function passed from the App component
     });
 
     // Cleanup on unmount
     return () => {
-      socket.off("matchFound"); // Remove the event listener
-      socket.off("error");
+      socket.off("matchFound");
     };
-  }, []);
+  }, [onMatchFound]);
 
   const handleSetNameAndJoinQueue = () => {
     if (name.trim()) {
-      // Emit setName to set the user's name on the server
       socket.emit("setName", name);
-      // Emit joinQueue to join the matchmaking queue
       socket.emit("joinQueue");
       setIsInQueue(true); // Update state to show user is in the queue
     } else {
@@ -42,31 +34,41 @@ const Matchmaking = () => {
 
   return (
     <div className="p-5">
-      {isMatched ? ( // Conditional rendering based on isMatched state
-        <h1>Done! You are matched!</h1>
+      {isInQueue ? (
+        <p>Waiting for a match...</p>
       ) : (
-        <>
-          <h1>Welcome to CP Buddy!</h1>
-          {isInQueue ? ( // Show waiting message if in queue
-            <p>Waiting for a match...</p>
-          ) : (
-            <>
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mb-2 p-2 border rounded"
-              />
-              <button
-                onClick={handleSetNameAndJoinQueue}
-                className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md ml-2"
-              >
-                Join
-              </button>
-            </>
-          )}
-        </>
+        // <>
+        //   <input
+        //     type="text"
+        //     placeholder="Enter your name"
+        //     value={name}
+        //     onChange={(e) => setName(e.target.value)}
+        //     className="w-full"
+        //   />
+        //   <button
+        //     onClick={handleSetNameAndJoinQueue}
+        //     className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md ml-2"
+        //   >
+        //     Join
+        //   </button>
+        // </>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-full max-w-md p-4 space-y-4">
+            <Input
+              type="text"
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full"
+            />
+            <Button
+              onClick={handleSetNameAndJoinQueue}
+              className="w-full font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md"
+            >
+              Join
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

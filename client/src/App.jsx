@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Navbar, Footer } from "./components";
 import Matchmaking from "./components/sockets/usermatch";
 import { Box } from "@chakra-ui/react";
@@ -7,6 +7,13 @@ import RandomQuestion from "./components/questions/question";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 const App = () => {
+  const [isMatched, setIsMatched] = useState(false); // Track if user is matched
+  const [name, setName] = useState(""); // Track the user's name
+
+  const handleMatchFound = () => {
+    setIsMatched(true); // Set matched state to true when match is found
+  };
+
   return (
     <BrowserRouter>
       <div>
@@ -19,7 +26,6 @@ const App = () => {
               viewBox="0 0 24 24"
               stroke-width="1.5"
               stroke="currentColor"
-              // className="size-6"
               className="h-6 mr-3 text-white sm:h-9"
             >
               <path
@@ -40,13 +46,20 @@ const App = () => {
             Compete
           </Link>
         </header>
-        <Matchmaking />
-        {/* <RandomQuestion /> */}
-        <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
-          <CodeEditor />
-        </Box>
+
+        {/* Conditional Rendering based on isMatched */}
+        {isMatched ? (
+          <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
+            <CodeEditor />
+          </Box>
+        ) : (
+          <Matchmaking
+            name={name}
+            setName={setName}
+            onMatchFound={handleMatchFound} // Trigger match found
+          />
+        )}
       </div>
-      <div className="flex justify-around items-center flex-col"></div>
       <Footer />
     </BrowserRouter>
   );
