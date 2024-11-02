@@ -60,7 +60,7 @@ const Matchmaking = () => {
               />
               <button
                 onClick={handleSetNameAndJoinQueue}
-                className="p-2 bg-indigo-700 text-white rounded ml-2"
+                className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md ml-2"
               >
                 Join
               </button>
