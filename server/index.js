@@ -20,26 +20,40 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 5000;
 app.use(cors());
 
-let queue = []; // This will hold the users waiting in the queue
-let activeRooms = {}; // Track active rooms and their users
+// Store user info as { id, name, socket } in the queue
+let queue = [];
+let activeRooms = {};
 
 io.on("connection", (socket) => {
   console.log("A user connected: " + socket.id);
 
+  // Listen for the user setting their name
+  socket.on("setName", (name) => {
+    socket.name = name; // Attach name to socket
+    console.log(`User connected with name: ${name} (ID: ${socket.id})`);
+  });
+
   // Listen for users joining the queue
   socket.on("joinQueue", () => {
+    // Check if the user has a name
+    if (!socket.name) {
+      console.log(`User ${socket.id} attempted to join without a name.`);
+      socket.emit("error", "Please set your name first.");
+      return;
+    }
+
     // Check if the user is already in an active room
     if (activeRooms[socket.id]) {
-      console.log(`User ${socket.id} is already in a match.`);
+      console.log(`User ${socket.name} (${socket.id}) is already in a match.`);
       return; // Prevent joining the queue if already matched
     }
 
     // Check if the user is already in the queue
-    if (!queue.find((user) => user.id === socket.id)) {
-      console.log(`User ${socket.id} joined the queue.`);
+    if (!queue.find((user) => user.socket.id === socket.id)) {
+      console.log(`User ${socket.name} (${socket.id}) joined the queue.`);
 
-      // Add user to the queue
-      queue.push(socket);
+      // Add user to the queue with their name
+      queue.push({ id: socket.id, name: socket.name, socket });
 
       // If there are 2 users in the queue, match them
       if (queue.length >= 2) {
@@ -48,23 +62,25 @@ io.on("connection", (socket) => {
 
         // Create a room for the matched users
         const roomId = `room_${user1.id}_${user2.id}`;
-        user1.join(roomId);
-        user2.join(roomId);
+        user1.socket.join(roomId);
+        user2.socket.join(roomId);
 
         // Mark the users as active in this room
         activeRooms[user1.id] = roomId;
         activeRooms[user2.id] = roomId;
 
         // Notify both users they have been matched
-        user1.emit("matchFound", { roomId, opponentId: user2.id });
-        user2.emit("matchFound", { roomId, opponentId: user1.id });
+        user1.socket.emit("matchFound", { roomId, opponentName: user2.name });
+        user2.socket.emit("matchFound", { roomId, opponentName: user1.name });
 
         console.log(
-          `Matched user ${user1.id} with user ${user2.id} in room: ${roomId}`
+          `Matched user ${user1.name} with user ${user2.name} in room: ${roomId}`
         );
       }
     } else {
-      console.log(`User ${socket.id} is already in the queue.`);
+      console.log(
+        `User ${socket.name} (${socket.id}) is already in the queue.`
+      );
     }
   });
 
