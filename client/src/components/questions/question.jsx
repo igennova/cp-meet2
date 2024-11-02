@@ -3,6 +3,7 @@ import axios from "axios";
 import { getroute, questionroute } from "@/api/ApiRoutes";
 import { Box, Text, Button } from "@chakra-ui/react";
 import { language_ID } from "@/constants";
+import { Card } from "@/components";
 
 const RandomQuestion = ({ editorRef, language }) => {
   const [question, setQuestion] = useState(null);
@@ -95,21 +96,38 @@ const RandomQuestion = ({ editorRef, language }) => {
       >
         {question ? (
           <div>
-            <h3>{question.title}</h3>
-            <p>{question.description}</p>
-            <pre>
-              Sample Input: {JSON.stringify(question.input_format, null, 2)}
-            </pre>
-            <pre>
-              Sample Output: {JSON.stringify(question.output_format, null, 2)}
-            </pre>
-            <pre>
-              Constraints: {JSON.stringify(question.constraints, null, 2)}
-            </pre>
+            <Text mb={4} fontSize="2xl">
+              {question.title}
+            </Text>
+            <Text mb={3}>{question.description}</Text>
+            <Text>Sample Input:</Text>
+            {question.input_format.map((line, index) => (
+              <Text mb="2" key={index} ml="5">
+                {line}
+              </Text>
+            ))}
+
+            <Text>Sample Output:</Text>
+            <Text mb="2" ml="5">
+              {question.output_format}
+            </Text>
+
+            <Text>Constraints:</Text>
+            <Text ml="5">
+              n: [{question.constraints.n_min}, {question.constraints.n_max}]
+            </Text>
           </div>
         ) : (
           <p>Loading...</p>
         )}
+        <Text></Text>
+        {/* <div className="flex justify-between items-center">
+          <Card number="1" />
+          <Card number="2" />
+          <Card number="3" />
+          <Card number="4" />
+          <Card number="5" />
+        </div> */}
       </Box>
     </Box>
   );
