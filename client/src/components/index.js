@@ -1,6 +1,7 @@
-import Footer from "./Footer";
-import Navbar from "./Navbar";
 import CodeEditor from "./CodeEditor";
-import Card from "./Card";
+import Footer from "./Footer";
+import LanguageSelector from "./LanguageSelector";
+import Navbar from "./Navbar";
+import RandomQuestion from "./RandomQuestion";
 
-export { Footer, Navbar, CodeEditor, Card };
+export { CodeEditor, Footer, LanguageSelector, Navbar, RandomQuestion };

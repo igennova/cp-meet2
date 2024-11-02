@@ -15,12 +15,22 @@ export const language_ID = {
 };
 
 export const CODE_SNIPPETS = {
-  "c++": "",
-  java: `public class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello World");\n\t}\n}\n`,
-  python2: `def greet(name):\n\tprint("Hello, " + name + "!")\n\ngreet("Alex")\n`,
-  python: `def greet(name):\n\tprint("Hello, " + name + "!")\n\ngreet("Alex")\n`,
-  c: "",
-  csharp: `using System;\n\nnamespace HelloWorld\n{\n\tclass Hello { \n\t\tstatic void Main(string[] args) {\n\t\t\tConsole.WriteLine("Hello World in C#");\n\t\t}\n\t}\n}\n`,
-  javascript: `function greet(name) {\n\tconsole.log("Hello, " + name + "!");\n}\n\ngreet("Alex");\n`,
-  typescript: `type Params = {\n\tname: string;\n}\n\nfunction greet(data: Params) {\n\tconsole.log("Hello, " + data.name + "!");\n}\n\ngreet({ name: "Alex" });\n`,
+  "c++":
+    '#include <iostream>\nint main() {\n    std::cout << "Hello, World!";\n    return 0;\n}',
+  java: 'public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
+  python2: 'print "Hello, World!"',
+  python: 'print("Hello, World!")',
+  c: '#include <stdio.h>\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
+  csharp:
+    'using System;\nclass HelloWorld {\n    static void Main() {\n        Console.WriteLine("Hello, World!");\n    }\n}',
+  javascript: 'console.log("Hello, World!");',
+  typescript: 'console.log("Hello, World!");',
+};
+
+const localhost = `http://localhost:5000`;
+
+export const routes = {
+  localhost,
+  questionroute: `${localhost}/api/questions`,
+  getroute: `${localhost}/api/getcode`,
 };

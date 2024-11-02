@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-// import { InputPage } from "@/components";
+import { Input, Button } from "@/components/ui";
 
 const socket = io("http://localhost:5000");
 

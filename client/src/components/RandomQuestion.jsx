@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { getroute, questionroute } from "@/api/ApiRoutes";
+import { routes, language_ID } from "@/constants";
 import { Box, Text, Button } from "@chakra-ui/react";
-import { language_ID } from "@/constants";
-import { Card } from "@/components";
 
 const RandomQuestion = ({ editorRef, language }) => {
   const [question, setQuestion] = useState(null);
@@ -13,8 +11,8 @@ const RandomQuestion = ({ editorRef, language }) => {
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
-        console.log("Question route:", questionroute); // Check the API route
-        const response = await axios.get(questionroute);
+        console.log("Question route:", routes.questionroute); // Check the API route
+        const response = await axios.get(routes.questionroute);
         console.log("API Response:", response.data); // Log the response
         setQuestion(response.data);
       } catch (error) {
@@ -36,10 +34,10 @@ const RandomQuestion = ({ editorRef, language }) => {
 
     const language_id = language_ID[language];
 
-    const response = await axios.get(questionroute);
+    const response = await axios.get(routes.questionroute);
     const problem_id = response.data.question_id;
     axios
-      .post(getroute, {
+      .post(routes.getroute, {
         problem_id,
         source_code,
         language_id,
@@ -53,26 +51,6 @@ const RandomQuestion = ({ editorRef, language }) => {
   };
 
   return (
-    // <div>
-    //   <h2>Random Question</h2>
-    //   {question ? (
-    //     <div>
-    //       <h3>{question.title}</h3>
-    //       <p>{question.description}</p>
-    //       <pre>
-    //         Sample Input: {JSON.stringify(question.input_format, null, 2)}
-    //       </pre>
-    //       <pre>
-    //         Sample Output: {JSON.stringify(question.output_format, null, 2)}
-    //       </pre>
-    //       <pre>
-    //         Constraints: {JSON.stringify(question.constraints, null, 2)}
-    //       </pre>
-    //     </div>
-    //   ) : (
-    //     <p>Loading...</p>
-    //   )}
-    // </div>
     <Box w="50%">
       <Text mb={2} fontSize="lg">
         Random Question
@@ -120,14 +98,6 @@ const RandomQuestion = ({ editorRef, language }) => {
         ) : (
           <p>Loading...</p>
         )}
-        <Text></Text>
-        {/* <div className="flex justify-between items-center">
-          <Card number="1" />
-          <Card number="2" />
-          <Card number="3" />
-          <Card number="4" />
-          <Card number="5" />
-        </div> */}
       </Box>
     </Box>
   );

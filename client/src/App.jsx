@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { Navbar, Footer } from "./components";
-import Matchmaking from "./components/sockets/usermatch";
+import { Footer, CodeEditor } from "@/components";
+import Matchmaking from "@/components/sockets/usermatch";
 import { Box } from "@chakra-ui/react";
-import { CodeEditor, Card } from "./components";
-import RandomQuestion from "./components/questions/question";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 const App = () => {
@@ -17,7 +15,6 @@ const App = () => {
   return (
     <BrowserRouter>
       <div>
-        {/* <Navbar /> */}
         <header className="w-full flex justify-between items-center sm:px-8 px-4 py-4 border-b border-b-[#e6ebf4]">
           <Link to="/" className="flex justify-between items-center">
             <svg
