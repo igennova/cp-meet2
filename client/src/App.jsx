@@ -16,8 +16,7 @@ const App = () => {
           <CodeEditor />
         </Box>
       </div>
-      <div className="flex justify-around items-center flex-col">
-      </div>
+      <div className="flex justify-around items-center flex-col"></div>
       <Footer />
     </>
   );
