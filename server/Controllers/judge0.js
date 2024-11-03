@@ -5,8 +5,8 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const arr = {
-    "C++ (GCC 14.1.0)": 105,
-    "Python (3.12.5)": 100
+  "C++ (GCC 14.1.0)": 105,
+  "Python (3.12.5)": 100,
 };
 
 const getcode = async (req, res) => {
@@ -22,7 +22,9 @@ const getcode = async (req, res) => {
   }
 
   if (!problem_id || !source_code || !language_id) {
-    userSocket.emit("error", { message: "Missing problem_id, source_code, or language_id" });
+    userSocket.emit("error", {
+      message: "Missing problem_id, source_code, or language_id",
+    });
     return;
   }
 
@@ -33,13 +35,15 @@ const getcode = async (req, res) => {
       return;
     }
 
-    const submissions = problemData.test_cases.map(testCase => ({
+    const submissions = problemData.test_cases.map((testCase) => ({
       language_id,
       source_code: Buffer.from(source_code).toString("base64"),
       stdin: Buffer.from(testCase.input.join("\n")).toString("base64"),
     }));
 
-    const expectedOutputs = problemData.test_cases.map(testCase => testCase.expected_output);
+    const expectedOutputs = problemData.test_cases.map(
+      (testCase) => testCase.expected_output
+    );
 
     const results = await Promise.all(
       submissions.map((submission, index) =>
@@ -47,15 +51,22 @@ const getcode = async (req, res) => {
       )
     );
 
-    const allPassed = results.every(result => result.status === "Right Answer");
+    const allPassed = results.every(
+      (result) => result.status === "Right Answer"
+    );
 
     if (allPassed) {
       userSocket.emit("gameResult", { status: "win", message: "You win!" });
-      const opponentId = Object.keys(activeRooms).find(id => id !== userSocket.id && activeRooms[id] === roomId);
+      const opponentId = Object.keys(activeRooms).find(
+        (id) => id !== userSocket.id && activeRooms[id] === roomId
+      );
       if (opponentId) {
         const opponentSocket = io.sockets.sockets.get(opponentId);
         if (opponentSocket) {
-          opponentSocket.emit("gameResult", { status: "lose", message: "You lost!" });
+          opponentSocket.emit("gameResult", {
+            status: "lose",
+            message: "You lost!",
+          });
         }
       }
     }
@@ -69,8 +80,6 @@ const getcode = async (req, res) => {
     userSocket.emit("error", { message: "Server error", error: error.message });
   }
 };
-
-
 
 // Modify submitCodeAndCheckResult to accept expectedOutput for comparison
 export const submitCodeAndCheckResult = async (submission, expectedOutput) => {
@@ -127,20 +136,20 @@ export const checkSubmissionResult = async (submissionId, expectedOutput) => {
       if (statusId === 3) {
         // Compare Judge0 output with expected output
         const decodedOutput = atob(resultData.stdout).trim();
-    
+
         // Trim the expected output as well
         const trimmedExpectedOutput = expectedOutput.trim();
-    
+
         // Compare Judge0 output with expected output
         const isCorrect = decodedOutput === trimmedExpectedOutput;
         console.log(isCorrect ? "Correct" : "Wrong");
         console.log("Expected Output:", trimmedExpectedOutput);
         console.log("Judge0 Output:", decodedOutput);
-    
+
         return {
-            status: isCorrect ? "Right Answer" : "Wrong Answer",
-            output: decodedOutput,
-            expected_output: trimmedExpectedOutput,
+          status: isCorrect ? "Right Answer" : "Wrong Answer",
+          output: decodedOutput,
+          expected_output: trimmedExpectedOutput,
         };
       } else if (statusId === 5) {
         return {
@@ -162,6 +171,5 @@ export const checkSubmissionResult = async (submissionId, expectedOutput) => {
     return { error: "Error checking submission result" };
   }
 };
-
 
 export default getcode;

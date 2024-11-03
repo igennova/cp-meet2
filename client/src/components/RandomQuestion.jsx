@@ -65,7 +65,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       .get(routes.questionroute)
       .then((response) => {
         const problem_id = response.data.question_id;
-        
+
         socket.emit("submitCode", {
           roomId,
           userName,
@@ -86,8 +86,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   return (
     <Box w="50%">
       <Text mb={2} fontSize="lg">
-        Random Question
-        Hello {userName}
+        Random Question Hello {userName}
       </Text>
       <Button
         variant="outline"
