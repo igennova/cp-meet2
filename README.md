@@ -1,4 +1,4 @@
-# <img src="client/public/favicon.svg" alt="Favicon" width="30px" style="filter: invert(1) brightness(50%) grayscale(1);"> CP Buddy - 1v1 DSA Battle
+# <img src="client/public/favicon.svg" alt="Favicon" width="30px" style="filter: invert(0.5)"> CP Buddy - 1v1 DSA Battle
 
 This web application lets you have a 1v1 DSA Battle. Faster ones wins the game.
 
