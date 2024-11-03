@@ -7,11 +7,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const [question, setQuestion] = useState(null);
   const [error, setError] = useState(null);
   const [gameResult, setGameResult] = useState(null); // New state for game result
+  const [problem_id, setProblem_id] = useState(null);
 
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
         const response = await axios.get(routes.questionroute);
+        setProblem_id(response.data.question_id);
+        // console.log(problem_id);
         setQuestion(response.data);
       } catch (error) {
         setError("Error fetching question. Please try again.");
@@ -61,22 +64,23 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
     const language_id = language_ID[language];
 
     // Fetch the problem ID again to ensure up-to-date info
-    axios
-      .get(routes.questionroute)
-      .then((response) => {
-        const problem_id = response.data.question_id;
+    // axios
+    //   .get(routes.questionroute)
+    //   .then((response) => {
+    //     const problem_id = response.data.question_id;
+    console.log(problem_id);
 
-        socket.emit("submitCode", {
-          roomId,
-          userName,
-          problem_id,
-          source_code,
-          language_id,
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching problem ID:", error);
-      });
+    socket.emit("submitCode", {
+      roomId,
+      userName,
+      problem_id: problem_id,
+      source_code,
+      language_id,
+    });
+    // })
+    // .catch((error) => {
+    //   console.error("Error fetching problem ID:", error);
+    // });
   };
 
   if (error) {

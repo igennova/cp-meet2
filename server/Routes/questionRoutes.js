@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
-import getQuestionById from "../Controllers/questionController.js";
+import getRandomQuestion from "../controllers/questionController.js";
 
-router.get("/questions", getQuestionById);
+router.get("/questions", getRandomQuestion);
 
 export default router;

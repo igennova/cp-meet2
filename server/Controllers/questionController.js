@@ -1,4 +1,4 @@
-import Question from "../Models/question.js";
+import Question from "../models/question.js";
 
 const getRandomQuestion = async (req, res) => {
   try {
@@ -39,4 +39,4 @@ const getQuestionById = async (req, res) => {
 };
 
 // Export multiple functions
-export default getQuestionById;
+export default getRandomQuestion;

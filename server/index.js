@@ -5,12 +5,12 @@ import cors from "cors";
 import questionRoutes from "./Routes/questionRoutes.js";
 import mongoose from "mongoose";
 import * as dotenv from "dotenv";
-import Question from "./Models/question.js";
+import Question from "./models/question.js";
 
 import {
   submitCodeAndCheckResult,
   checkSubmissionResult,
-} from "./Controllers/judge0.js";
+} from "./controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
 const app = express();
 app.use(express.json());
