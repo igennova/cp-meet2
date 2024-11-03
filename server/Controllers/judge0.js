@@ -1,64 +1,79 @@
 import Question from "../Models/question.js"; // Adjust path if needed
 import fetch from "node-fetch"; // Ensure you have this package installed
 import * as dotenv from "dotenv";
+
 dotenv.config();
 
-// const arr = {
-//     "C++ (GCC 14.1.0)": 105,
-//     "Python (3.12.5)": 100
-// };
+const arr = {
+    "C++ (GCC 14.1.0)": 105,
+    "Python (3.12.5)": 100
+};
 
 const getcode = async (req, res) => {
-  const { problem_id, source_code, language_id } = req.body;
+  const { problem_id, source_code, language_id, roomId, userName } = req.body;
 
-  // Validate input
+  const io = req.app.get("io");
+  const userSocket = io.sockets.sockets.get(req.sessionID);
+  const activeRooms = getactiveRoom();
+
+  if (!userSocket) {
+    res.status(404).json({ message: "Socket not found" });
+    return;
+  }
+
   if (!problem_id || !source_code || !language_id) {
-    return res
-      .status(400)
-      .json({ message: "Missing problem_id, source_code, or language_id" });
+    userSocket.emit("error", { message: "Missing problem_id, source_code, or language_id" });
+    return;
   }
 
   try {
-    // Fetch problem data from MongoDB
     const problemData = await Question.findOne({ question_id: problem_id });
-
     if (!problemData) {
-      return res.status(404).json({ message: "Problem not found" });
+      userSocket.emit("error", { message: "Problem not found" });
+      return;
     }
 
-    // Prepare submissions and expected outputs
-    const submissions = problemData.test_cases.map((testCase) => ({
+    const submissions = problemData.test_cases.map(testCase => ({
       language_id,
       source_code: Buffer.from(source_code).toString("base64"),
       stdin: Buffer.from(testCase.input.join("\n")).toString("base64"),
     }));
 
-    // Store expected outputs for later comparison
-    const expectedOutputs = problemData.test_cases.map(
-      (testCase) => testCase.expected_output
-    );
-    console.log(expectedOutputs);
+    const expectedOutputs = problemData.test_cases.map(testCase => testCase.expected_output);
 
-    // Submit each test case to Judge0 and check the result
     const results = await Promise.all(
       submissions.map((submission, index) =>
         submitCodeAndCheckResult(submission, expectedOutputs[index])
       )
     );
 
-    // Send back the results
-    res.status(200).json({
+    const allPassed = results.every(result => result.status === "Right Answer");
+
+    if (allPassed) {
+      userSocket.emit("gameResult", { status: "win", message: "You win!" });
+      const opponentId = Object.keys(activeRooms).find(id => id !== userSocket.id && activeRooms[id] === roomId);
+      if (opponentId) {
+        const opponentSocket = io.sockets.sockets.get(opponentId);
+        if (opponentSocket) {
+          opponentSocket.emit("gameResult", { status: "lose", message: "You lost!" });
+        }
+      }
+    }
+
+    userSocket.emit("results", {
       message: "Submissions processed successfully",
       results,
     });
   } catch (error) {
-    console.error("Error fetching problem data:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Error:", error);
+    userSocket.emit("error", { message: "Server error", error: error.message });
   }
 };
 
+
+
 // Modify submitCodeAndCheckResult to accept expectedOutput for comparison
-const submitCodeAndCheckResult = async (submission, expectedOutput) => {
+export const submitCodeAndCheckResult = async (submission, expectedOutput) => {
   const url =
     "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&fields=*";
 
@@ -89,7 +104,7 @@ const submitCodeAndCheckResult = async (submission, expectedOutput) => {
 };
 
 // Modify checkSubmissionResult to accept expectedOutput for comparison
-const checkSubmissionResult = async (submissionId, expectedOutput) => {
+export const checkSubmissionResult = async (submissionId, expectedOutput) => {
   const resultUrl = `https://judge0-ce.p.rapidapi.com/submissions/${submissionId}?base64_encoded=true&fields=*`;
 
   const options = {
@@ -112,20 +127,20 @@ const checkSubmissionResult = async (submissionId, expectedOutput) => {
       if (statusId === 3) {
         // Compare Judge0 output with expected output
         const decodedOutput = atob(resultData.stdout).trim();
-
+    
         // Trim the expected output as well
         const trimmedExpectedOutput = expectedOutput.trim();
-
+    
         // Compare Judge0 output with expected output
         const isCorrect = decodedOutput === trimmedExpectedOutput;
         console.log(isCorrect ? "Correct" : "Wrong");
         console.log("Expected Output:", trimmedExpectedOutput);
         console.log("Judge0 Output:", decodedOutput);
-
+    
         return {
-          status: isCorrect ? "Right Answer" : "Wrong Answer",
-          output: decodedOutput,
-          expected_output: trimmedExpectedOutput,
+            status: isCorrect ? "Right Answer" : "Wrong Answer",
+            output: decodedOutput,
+            expected_output: trimmedExpectedOutput,
         };
       } else if (statusId === 5) {
         return {
@@ -147,5 +162,6 @@ const checkSubmissionResult = async (submissionId, expectedOutput) => {
     return { error: "Error checking submission result" };
   }
 };
+
 
 export default getcode;
