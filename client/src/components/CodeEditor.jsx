@@ -3,7 +3,7 @@ import { Box, HStack } from "@chakra-ui/react";
 import { Editor } from "@monaco-editor/react";
 import { RandomQuestion, LanguageSelector } from "@/components";
 
-const CodeEditor = () => {
+const CodeEditor = ({ socket, roomId, userName })=> {
   const editorRef = useRef();
   const [value, setValue] = useState("");
   const [language, setLanguage] = useState("python");
@@ -22,7 +22,13 @@ const CodeEditor = () => {
     <Box>
       <HStack spacing={4}>
         {/* <Output editorRef={editorRef} language={language} /> */}
-        <RandomQuestion editorRef={editorRef} language={language} />
+        <RandomQuestion
+          editorRef={editorRef}
+          language={language}
+          socket={socket}
+          roomId={roomId}
+          userName={userName}
+        />
         <Box w="50%">
           <LanguageSelector language={language} onSelect={onSelect} />
           <Editor

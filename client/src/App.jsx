@@ -1,15 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import { Footer, CodeEditor } from "@/components";
-import Matchmaking from "@/components/sockets/usermatch";
 import { Box } from "@chakra-ui/react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+const socket = io("http://localhost:5000");
 
 const App = () => {
-  const [isMatched, setIsMatched] = useState(false); // Track if user is matched
-  const [name, setName] = useState(""); // Track the user's name
+  const [roomId, setRoomId] = useState("");
+  const [userName, setUserName] = useState("");
+  const [isRoomCreated, setIsRoomCreated] = useState(false);
+  const [isRoomJoined, setIsRoomJoined] = useState(false);
+  const [gameMessage, setGameMessage] = useState("");
+  const [isMatched, setIsMatched] = useState(false);
 
-  const handleMatchFound = () => {
-    setIsMatched(true); // Set matched state to true when match is found
+  useEffect(() => {
+    socket.on("roomCreated", (data) => {
+      if (data.success) {
+        setIsRoomCreated(true);
+        setGameMessage("Room created successfully!");
+      } else {
+        setGameMessage(data.message);
+      }
+    });
+
+    socket.on("roomJoined", (data) => {
+      if (data.success) {
+        setIsRoomJoined(true);
+        setGameMessage("Joined room successfully!");
+      } else {
+        setGameMessage(data.message);
+      }
+    });
+
+    // Listen for 'startGame' event to show the CodeEditor
+    socket.on("startGame", () => {
+      setIsMatched(true); // Set matched state to true to display CodeEditor
+    });
+
+    socket.on("playerDisconnected", (data) => {
+      setGameMessage(`Player ${data.playerId} disconnected.`);
+      setIsMatched(false); // Reset matched state if a player disconnects
+    });
+
+    return () => socket.off(); // Clean up event listeners on component unmount
+  }, []);
+
+  const createRoom = () => {
+    if (roomId && userName) {
+      socket.emit("createRoom", { roomId, userName });
+    }
+  };
+
+  const joinRoom = () => {
+    if (roomId && userName) {
+      socket.emit("joinRoom", { roomId, userName });
+    }
   };
 
   return (
@@ -43,18 +88,34 @@ const App = () => {
             Compete
           </Link>
         </header>
-
-        {/* Conditional Rendering based on isMatched */}
         {isMatched ? (
           <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
-            <CodeEditor />
+           <CodeEditor socket={socket} roomId={roomId} userName={userName} />
           </Box>
         ) : (
-          <Matchmaking
-            name={name}
-            setName={setName}
-            onMatchFound={handleMatchFound} // Trigger match found
-          />
+          <div>
+            <h1>Quick Click Game</h1>
+            <input
+              type="text"
+              placeholder="Enter Your Name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Enter Room ID"
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+            />
+            <button onClick={createRoom} disabled={isRoomCreated}>
+              Create Room
+            </button>
+            <button onClick={joinRoom} disabled={isRoomJoined || isRoomCreated}>
+              Join Room
+            </button>
+
+            <p>{gameMessage}</p>
+          </div>
         )}
       </div>
       <Footer />
