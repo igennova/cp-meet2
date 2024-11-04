@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
           .to(roomId)
           .emit("playerJoined", { playerId: socket.id, userName });
         if (rooms[roomId].players.length === 2) {
-          io.to(roomId).emit("startGame");
+          io.to(roomId).emit("startGame")
         }
       } else {
         socket.emit("roomJoined", {

@@ -47,15 +47,27 @@ const App = () => {
   }, []);
 
   const createRoom = () => {
-    if (roomId && userName) {
-      socket.emit("createRoom", { roomId, userName });
+    const parsedRoomId = parseInt(roomId, 10);
+
+    if (Number.isInteger(parsedRoomId)) {
+      if (roomId && userName) {
+        socket.emit("createRoom", { roomId: parsedRoomId, userName });
+      }
+    } else {
+      setGameMessage("Please enter a valid integer for room ID.");
     }
-  };
+    };
 
   const joinRoom = () => {
+    const parsedRoomId = parseInt(roomId, 10);
+
+  if (Number.isInteger(parsedRoomId)) {
     if (roomId && userName) {
-      socket.emit("joinRoom", { roomId, userName });
+      socket.emit("joinRoom", { roomId: parsedRoomId, userName });
     }
+  } else {
+    setGameMessage("Please enter a valid integer for room ID.");
+  }
   };
 
   return (

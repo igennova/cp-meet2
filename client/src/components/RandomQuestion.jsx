@@ -18,19 +18,23 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
     theme: "dark",
   };
   useEffect(() => {
-    const fetchQuestion = async () => {
+    const fetchQuestion = async (roomId) => {
       try {
-        const response = await axios.get(routes.questionroute);
+        console.log(roomId)
+        const problemId = (roomId%5)+1;
+        const response = await axios.get(routes.questionroute,{
+          params: { roomId },
+        });
         setProblem_id(response.data.question_id);
         setQuestion(response.data);
       } catch (error) {
         console.error("Error fetching question:", error);
         toast.error("Error fetching question. Please try again.",toastOptions);
-        setFetchError(true); // Set fetchError to true if there is an error
+        setFetchError(true); 
       }
     };
 
-    fetchQuestion();
+    fetchQuestion(roomId);
   }, []);
 
   useEffect(() => {
