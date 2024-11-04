@@ -29,8 +29,8 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         setQuestion(response.data);
       } catch (error) {
         console.error("Error fetching question:", error);
-        toast.error("Error fetching question. Please try again.",toastOptions);
-        setFetchError(true); 
+        toast.error("Error fetching question. Please try again.", toastOptions);
+        setFetchError(true);
       }
     };
 
@@ -41,7 +41,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
     socket.on("gameResult", (data) => {
       if (data.winner && data.winner.name === userName) {
         setGameResult("You won the game!");
-        toast.success("Congratulations! You won the game!",toastOptions);
+        toast.success("Congratulations! You won the game!", toastOptions);
       } else {
         setGameResult("You lost the game.");
         toast.info("You lost the game.");
@@ -65,13 +65,9 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const runCode = () => {
     const source_code = editorRef.current.getValue();
     if (!source_code) {
-      
-      toast.error("Please enter your code to submit.",toastOptions);
+      toast.error("Please enter your code to submit.", toastOptions);
       return;
-
     }
-    ;
-
     const language_id = language_ID[language];
 
     socket.emit("submitCode", {

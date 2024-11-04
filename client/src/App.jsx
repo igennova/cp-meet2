@@ -56,18 +56,18 @@ const App = () => {
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
-    };
+  };
 
   const joinRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
 
-  if (Number.isInteger(parsedRoomId)) {
-    if (roomId && userName) {
-      socket.emit("joinRoom", { roomId: parsedRoomId, userName });
+    if (Number.isInteger(parsedRoomId)) {
+      if (roomId && userName) {
+        socket.emit("joinRoom", { roomId: parsedRoomId, userName });
+      }
+    } else {
+      setGameMessage("Please enter a valid integer for room ID.");
     }
-  } else {
-    setGameMessage("Please enter a valid integer for room ID.");
-  }
   };
 
   return (
