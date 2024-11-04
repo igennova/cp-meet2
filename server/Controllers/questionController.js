@@ -25,7 +25,8 @@ const getAllQuestions = async (req, res) => {
 };
 const getQuestionById = async (req, res) => {
   try {
-    const problemId = 3; // Specify the problem ID here
+    const problemId = req.query.roomId 
+    console.log(problemId)
     const question = await Question.findOne({ question_id: problemId });
 
     if (question) {
@@ -39,4 +40,4 @@ const getQuestionById = async (req, res) => {
 };
 
 // Export multiple functions
-export default getRandomQuestion;
+export default getQuestionById;
