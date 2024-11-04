@@ -79,49 +79,58 @@ io.on("connection", (socket) => {
     "submitCode",
     async ({ problem_id, source_code, language_id, roomId, userName }) => {
       const room = rooms[roomId];
-
+  
       if (!problem_id || !source_code || !language_id) {
         socket.emit("error", {
           message: "Missing problem_id, source_code, or language_id",
         });
         return;
       }
-
+  
       try {
         const problemData = await Question.findOne({ question_id: problem_id });
         if (!problemData) {
           socket.emit("error", { message: "Problem not found" });
           return;
         }
-
+  
         const submissions = problemData.test_cases.map((testCase) => ({
           language_id,
           source_code: Buffer.from(source_code).toString("base64"),
           stdin: Buffer.from(testCase.input.join("\n")).toString("base64"),
         }));
-
+  
         const expectedOutputs = problemData.test_cases.map(
           (testCase) => testCase.expected_output
         );
-
+  
         const results = await Promise.all(
           submissions.map((submission, index) =>
             submitCodeAndCheckResult(submission, expectedOutputs[index])
           )
         );
-
+  
+        // Evaluate results
         const allPassed = results.every(
           (result) => result.status === "Right Answer"
         );
-
+        const timeLimitExceeded = results.some(
+          (result) => result.status === "Time Limit Exceeded"
+        );
+  
         if (allPassed && room && !room.winner) {
           room.winner = { id: socket.id, name: userName };
           io.to(roomId).emit("gameResult", {
             winner: room.winner,
             message: `${userName} won the game!`,
           });
+        } else if (timeLimitExceeded) {
+          socket.emit("results", {
+            message: "Time Limit Exceeded on some test cases",
+            results,
+          });
         } else {
-          socket.emit("results", { message: "Submissions processed", results });
+          socket.emit("results", { message: "Hidden test case failed" });
         }
       } catch (error) {
         console.error("Error:", error);
@@ -130,20 +139,28 @@ io.on("connection", (socket) => {
     }
   );
 
+
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
+  
     for (const roomId in rooms) {
-      if (rooms[roomId].players.some((player) => player.id === socket.id)) {
-        rooms[roomId].players = rooms[roomId].players.filter(
-          (player) => player.id !== socket.id
-        );
+      const room = rooms[roomId];
+      const playerIndex = room.players.findIndex((player) => player.id === socket.id);
+  
+      if (playerIndex !== -1) {
+        // Remove the disconnected player from the room
+        room.players.splice(playerIndex, 1);
         socket.to(roomId).emit("playerDisconnected", { playerId: socket.id });
+  
+        // Check if the room is now empty, and if so, delete it
+        if (room.players.length === 0) {
+          delete rooms[roomId];
+          console.log(`Room ${roomId} has been deleted as both players disconnected.`);
+        }
         break;
       }
     }
-  });
-});
-
+  })});
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => console.log("DB Connected"))
