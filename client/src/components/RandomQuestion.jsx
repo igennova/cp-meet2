@@ -115,24 +115,42 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
           </Text>
         ) : question ? (
           <div>
-            <Text mb={4} fontSize="2xl">
-              {question.title}
+            <Text className="text-close-to-white" mb={4} fontSize="2xl">
+              {question.question_id}. {question.title}
             </Text>
-            <Text mb={3}>{question.description}</Text>
-            <Text>Sample Input:</Text>
+            <Text className="text-white" mb={3}>
+              {question.description}
+            </Text>
+            <Text className="text-white">Example:</Text>
+            <Text className="text-white" ml="5">
+              Input:
+            </Text>
+            {question.example.input.map((line, index) => (
+              <Text className="text-white" mb="3" key={index} ml="10">
+                {line}
+              </Text>
+            ))}
+            <Text className="text-white" ml="5">
+              Output:
+            </Text>
+            <Text className="text-white" mb="3" ml="10">
+              {question.example.output}
+            </Text>
+            <Text className="text-white">Sample Input:</Text>
             {question.input_format.map((line, index) => (
-              <Text mb="2" key={index} ml="5">
+              <Text className="text-white" mb="3" key={index} ml="5">
                 {line}
               </Text>
             ))}
 
-            <Text>Sample Output:</Text>
-            <Text mb="2" ml="5">
+            <Text className="text-white">Sample Output:</Text>
+            <Text className="text-white" mb="3" ml="5">
               {question.output_format}
             </Text>
 
-            <Text>Constraints:</Text>
-            <Text ml="5">
+
+            <Text className="text-white">Constraints:</Text>
+            <Text className="text-white" ml="5">
               n: [{question.constraints.n_min}, {question.constraints.n_max}]
             </Text>
           </div>
