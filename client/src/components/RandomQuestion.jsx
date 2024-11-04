@@ -148,7 +148,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
               {question.output_format}
             </Text>
 
-
             <Text className="text-white">Constraints:</Text>
             <Text className="text-white" ml="5">
               n: [{question.constraints.n_min}, {question.constraints.n_max}]

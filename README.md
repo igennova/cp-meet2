@@ -2,21 +2,18 @@
 
 This web application lets you have a 1v1 DSA Battle. Faster ones wins the game.
 
-
 ## Authors
 
 - [@devSuryansh](https://www.github.com/devSuryansh)
 - [@igennova](https://www.github.com/igennova)
 
-
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your *./server/.env* file
+To run this project, you will need to add the following environment variables to your _./server/.env_ file
 
 `MONGODB_URL`
 
 `JUDGE_KEY`
-
 
 ## Run Locally
 
@@ -38,14 +35,14 @@ Install dependencies for both client and server
   cd client; npm i; cd ..; cd server; npm i
 ```
 
-Start the project `./client`
-
-```bash
-  npm run dev
-```
-
 Start the server `./server`
 
 ```bash
   npm run start
+```
+
+Start the project `./client`
+
+```bash
+  npm run dev
 ```
