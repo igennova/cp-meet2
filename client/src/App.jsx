@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 import { Footer, CodeEditor } from "@/components";
 import { Box } from "@chakra-ui/react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
+import { Text } from "@chakra-ui/react";
 const socket = io("http://localhost:5000");
 
 const App = () => {
@@ -93,28 +95,45 @@ const App = () => {
             <CodeEditor socket={socket} roomId={roomId} userName={userName} />
           </Box>
         ) : (
-          <div>
-            <h1>Quick Click Game</h1>
-            <input
-              type="text"
-              placeholder="Enter Your Name"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Enter Room ID"
-              value={roomId}
-              onChange={(e) => setRoomId(e.target.value)}
-            />
-            <button onClick={createRoom} disabled={isRoomCreated}>
-              Create Room
-            </button>
-            <button onClick={joinRoom} disabled={isRoomJoined || isRoomCreated}>
-              Join Room
-            </button>
-
-            <p>{gameMessage}</p>
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="w-full max-w-md p-4 space-y-4">
+              <HyperText
+                className="text-4xl font-bold text-white dark:text-white"
+                text="Quick Click Game"
+              />
+              <Input
+                type="text"
+                placeholder="Enter Your Name"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full"
+              />
+              <Input
+                type="text"
+                placeholder="Enter Room ID"
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+                className="w-full"
+              />
+              <Button
+                onClick={createRoom}
+                disabled={isRoomCreated}
+                className="w-full font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md"
+              >
+                Create Room
+              </Button>
+              <Button
+                onClick={joinRoom}
+                disabled={isRoomJoined || isRoomCreated}
+                className="w-full font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md"
+              >
+                Join Room
+              </Button>
+              <GradualSpacing
+                className="font-display text-center text-4xl font-bold -tracking-widest  text-white dark:text-white md:text-7xl md:leading-[5rem]"
+                text={gameMessage}
+              />
+            </div>
           </div>
         )}
       </div>
