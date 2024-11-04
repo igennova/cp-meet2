@@ -4,7 +4,6 @@ import { Footer, CodeEditor } from "@/components";
 import { Box } from "@chakra-ui/react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
-import { Text } from "@chakra-ui/react";
 const socket = io("http://localhost:5000");
 
 const App = () => {
