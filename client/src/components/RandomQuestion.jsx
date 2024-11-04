@@ -20,11 +20,11 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   useEffect(() => {
     const fetchQuestion = async (roomId) => {
       try {
-        console.log(roomId);
-        const problemId = (roomId % 5) + 1;
-        const response = await axios.get(routes.questionroute, {
-          params: { roomId },
+        const problemId = (roomId%5)+1;
+        const response = await axios.get(routes.questionroute,{
+          params: { problemId },
         });
+        console.log(problemId)
         setProblem_id(response.data.question_id);
         setQuestion(response.data);
       } catch (error) {
@@ -38,14 +38,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   }, []);
 
   useEffect(() => {
-    socket.on("results", (data) => {
-      if (data.message === "Hidden test case failed") {
-        toast.warning("Hidden test case failed.", toastOptions);
-      } else if (data.message === "Time Limit Exceeded on some test cases") {
-        toast.error("Time Limit Exceeded on some test cases.", toastOptions);
-      }
-    });
-
     socket.on("gameResult", (data) => {
       if (data.winner && data.winner.name === userName) {
         setGameResult("You won the game!");
@@ -55,6 +47,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         toast.info("You lost the game.");
       }
     });
+    socket.on("results", (data) => {
+      if (data.message === "Hidden test case failed") {
+        toast.warning("Hidden test case failed.",toastOptions);
+      } else if (data.message === "Time Limit Exceeded on some test cases") {
+        toast.error("Time Limit Exceeded on some test cases.",toastOptions);
+      }
+    });
+
 
     return () => {
       socket.off("results");
