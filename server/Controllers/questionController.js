@@ -25,8 +25,8 @@ const getAllQuestions = async (req, res) => {
 };
 const getQuestionById = async (req, res) => {
   try {
-    const problemId = req.query.roomId 
-    console.log(problemId)
+    const problemId = req.query.roomId;
+    console.log(problemId);
     const question = await Question.findOne({ question_id: problemId });
 
     if (question) {
