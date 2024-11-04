@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
-const alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const alphabets = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 const getRandomInt = (max) => Math.floor(Math.random() * max);
 

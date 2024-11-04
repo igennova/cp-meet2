@@ -98,7 +98,7 @@ const App = () => {
             <div className="w-full max-w-md p-4 space-y-4">
               <HyperText
                 className="text-4xl font-bold text-white dark:text-white"
-                text="Quick Click Game"
+                text="1V1 DSA BATTLE"
               />
               <Input
                 type="text"
