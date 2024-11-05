@@ -75,7 +75,7 @@ const App = () => {
 
     if (Number.isInteger(parsedRoomId)) {
       if (roomId && userName) {
-        socket.emit("createRoom", { roomId: parsedRoomId, userName });
+        socket.emit("createRoom", { roomId: roomId, userName });
       }
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
@@ -87,7 +87,7 @@ const App = () => {
 
     if (Number.isInteger(parsedRoomId)) {
       if (roomId && userName) {
-        socket.emit("joinRoom", { roomId: parsedRoomId, userName });
+        socket.emit("joinRoom", { roomId: roomId, userName });
       }
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
