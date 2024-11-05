@@ -12,7 +12,13 @@ const CodeEditor = ({ socket, roomId, userName }) => {
     editorRef.current = editor;
     editor.focus();
   };
-
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 5000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
   const onSelect = (language) => {
     setLanguage(language);
     // setValue(CODE_SNIPPETS[language]);
