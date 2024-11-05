@@ -22,7 +22,7 @@ const App = () => {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
-    } else if (time === 0){
+    } else if (time === 0) {
       // setTime(0);
       console.log("Time's up");
     }
