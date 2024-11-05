@@ -14,6 +14,30 @@ const App = () => {
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
 
+  const [time, setTime] = useState(300);
+
+  useEffect(() => {
+    let timer;
+    if (isMatched && time > 0) {
+      timer = setInterval(() => {
+        setTime((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (time === 0){
+      // setTime(0);
+      console.log("Time's up");
+    }
+
+    return () => clearInterval(timer);
+  }, [isMatched, time]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
   useEffect(() => {
     socket.on("roomCreated", (data) => {
       if (data.success) {
@@ -73,34 +97,36 @@ const App = () => {
   return (
     <BrowserRouter>
       <div>
-        <header className="w-full flex justify-between items-center sm:px-8 px-4 py-4 border-b border-b-[#e6ebf4]">
-          <Link to="/" className="flex justify-between items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              className="h-6 mr-3 text-white sm:h-9"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
-              />
-            </svg>
-            <span className="text-white self-center text-xl font-semibold whitespace-nowrap">
-              CP Buddy
-            </span>
+        <nav className="w-full flex justify-between items-center sm:px-8 px-4 py-4 border-b border-b-gray-500">
+          <Link to="/">
+            <div className="flex items-center space-x-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="h-6 mr-3 text-white sm:h-9"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                />
+              </svg>
+              <div className="text-white self-center text-xl font-semibold whitespace-nowrap">
+                CP Buddy
+              </div>
+            </div>
           </Link>
-
-          <Link
-            to="/"
-            className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md"
-          >
-            Compete
-          </Link>
-        </header>
+          {isMatched ? (
+            <div className="text-xl font-medium text-gray-600">
+              {formatTime(time)}
+            </div>
+          ) : (
+            <></>
+          )}
+        </nav>
         {isMatched ? (
           <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
             <CodeEditor socket={socket} roomId={roomId} userName={userName} />

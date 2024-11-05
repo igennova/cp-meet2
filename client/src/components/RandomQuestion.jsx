@@ -20,11 +20,11 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   useEffect(() => {
     const fetchQuestion = async (roomId) => {
       try {
-        const problemId = (roomId%5)+1;
-        const response = await axios.get(routes.questionroute,{
+        const problemId = (roomId % 5) + 1;
+        const response = await axios.get(routes.questionroute, {
           params: { problemId },
         });
-        console.log(problemId)
+        console.log(problemId);
         setProblem_id(response.data.question_id);
         setQuestion(response.data);
       } catch (error) {
@@ -49,12 +49,11 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
     });
     socket.on("results", (data) => {
       if (data.message === "Hidden test case failed") {
-        toast.warning("Hidden test case failed.",toastOptions);
+        toast.warning("Hidden test case failed.", toastOptions);
       } else if (data.message === "Time Limit Exceeded on some test cases") {
-        toast.error("Time Limit Exceeded on some test cases.",toastOptions);
+        toast.error("Time Limit Exceeded on some test cases.", toastOptions);
       }
     });
-
 
     return () => {
       socket.off("results");
@@ -85,10 +84,9 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         Random Question Hello {userName}
       </Text>
       <Button
-        variant="outline"
-        colorScheme="green"
-        mb={4}
+        variant="default"
         onClick={runCode}
+        className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 mb-4 rounded-md"
         disabled={!!gameResult} // Disable button if game is over
       >
         Submit
