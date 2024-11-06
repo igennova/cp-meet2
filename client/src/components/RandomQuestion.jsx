@@ -4,6 +4,7 @@ import { routes, language_ID } from "@/constants";
 import { Box, Text, Button } from "@chakra-ui/react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { GradualSpacing } from "@/components/ui";
 
 const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const [question, setQuestion] = useState(null);
@@ -103,9 +104,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         bg="#1E1E1E"
       >
         {gameResult ? ( // Display game result message
-          <Text fontSize="xl" color="green.500" textAlign="center">
-            {gameResult}
-          </Text>
+          <GradualSpacing
+            className={`font-display text-center text-4xl font-bold -tracking-widest  text-white dark:text-white md:text-7xl md:leading-[5rem] ${
+              gameResult === "You won the game!"
+                ? "text-green-500"
+                : "text-red-500"
+            }`}
+            text={gameResult}
+          />
         ) : question ? (
           <div>
             <Text className="text-close-to-white" mb={4} fontSize="2xl">
