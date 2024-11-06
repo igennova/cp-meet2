@@ -120,7 +120,7 @@ const App = () => {
             </div>
           </Link>
           {isMatched ? (
-            <div className="text-xl font-medium text-gray-600">
+            <div className="text-2xl font-medium text-white">
               {formatTime(time)}
             </div>
           ) : (
