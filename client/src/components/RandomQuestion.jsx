@@ -38,7 +38,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   }, []);
 
   useEffect(() => {
-    console.log(typeof roomId); 
+    console.log(typeof roomId);
     socket.on("gameResult", (data) => {
       if (data.winner && data.winner.name === userName) {
         setGameResult("You won the game!");
