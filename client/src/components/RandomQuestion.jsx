@@ -99,6 +99,8 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         border="1px solid"
         borderRadius={4}
         borderColor={fetchError ? "red.500" : "#333"} // Use fetchError to set borderColor
+        overflowY="auto"
+        bg="#1E1E1E"
       >
         {gameResult ? ( // Display game result message
           <Text fontSize="xl" color="green.500" textAlign="center">
