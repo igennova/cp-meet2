@@ -5,7 +5,7 @@ import { Box } from "@chakra-ui/react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
 const socket = io("http://localhost:5000");
-
+import { toast, ToastContainer } from "react-toastify";
 const App = () => {
   const [roomId, setRoomId] = useState("");
   const [userName, setUserName] = useState("");
@@ -14,7 +14,7 @@ const App = () => {
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
 
-  const [time, setTime] = useState(300);
+  const [time, setTime] = useState(5);
 
   useEffect(() => {
     let timer;
@@ -25,6 +25,9 @@ const App = () => {
     } else if (time === 0) {
       // setTime(0);
       console.log("Time's up");
+      toast.info("Time's up");
+
+      socket.disconnect();
     }
 
     return () => clearInterval(timer);
