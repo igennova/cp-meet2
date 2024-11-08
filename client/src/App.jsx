@@ -14,7 +14,7 @@ const App = () => {
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
 
-  const [time, setTime] = useState(5);
+  const [time, setTime] = useState(300);
 
   useEffect(() => {
     let timer;
