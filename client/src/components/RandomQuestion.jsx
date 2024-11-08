@@ -21,7 +21,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   useEffect(() => {
     const fetchQuestion = async (roomId) => {
       try {
-        const problemId = (roomId % 5) + 1;
+        const problemId = (roomId % 10) + 1;
         const response = await axios.get(routes.questionroute, {
           params: { problemId },
         });
@@ -148,9 +148,12 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
             </Text>
 
             <Text className="text-white">Constraints:</Text>
-            <Text className="text-white" ml="5">
-              n: [{question.constraints.n_min}, {question.constraints.n_max}]
-            </Text>
+            {Object.entries(question.constraints).map(([key, value], index) => (
+              <Text key={index} className="text-white" ml="5">
+                {key.replace("_", " ")}:{" "}
+                {Array.isArray(value) ? `[${value.join(", ")}]` : value}
+              </Text>
+            ))}
           </div>
         ) : (
           <p>Loading...</p>
