@@ -5,7 +5,7 @@ import cors from "cors";
 import questionRoutes from "./Routes/questionRoutes.js";
 import mongoose from "mongoose";
 import * as dotenv from "dotenv";
-import Question from "./models/question.js";
+import Question from "./Models/question.js";
 
 import {
   submitCodeAndCheckResult,
