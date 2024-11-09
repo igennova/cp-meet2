@@ -28,16 +28,48 @@ const io = new Server(server, {
 });
 
 const rooms = {}; // Store game room status
-const validrooms={
-  95169: 1, 57239: 1, 75303: 1, 76667: 1, 72080: 1,
-  11989: 1, 26521: 1, 26411: 1, 36902: 1, 56908: 1,
-  13707: 1, 43171: 1, 85435: 1, 99574: 1, 86490: 1,
-  81412: 1, 15758: 1, 13125: 1, 78568: 1, 84373: 1,
-  59944: 1, 77177: 1, 47776: 1, 82294: 1, 59506: 1,
-  30175: 1, 30452: 1, 87626: 1, 65260: 1, 57023: 1,
-  89567: 1, 30281: 1, 24789: 1, 23783: 1, 89788: 1,
-  76456: 1, 20806: 1, 36793: 1, 99438: 1, 45725: 10,
-}
+const validrooms = {
+  95169: 1,
+  57239: 1,
+  75303: 1,
+  76667: 1,
+  72080: 1,
+  11989: 1,
+  26521: 1,
+  26411: 1,
+  36902: 1,
+  56908: 1,
+  13707: 1,
+  43171: 1,
+  85435: 1,
+  99574: 1,
+  86490: 1,
+  81412: 1,
+  15758: 1,
+  13125: 1,
+  78568: 1,
+  84373: 1,
+  59944: 1,
+  77177: 1,
+  47776: 1,
+  82294: 1,
+  59506: 1,
+  30175: 1,
+  30452: 1,
+  87626: 1,
+  65260: 1,
+  57023: 1,
+  89567: 1,
+  30281: 1,
+  24789: 1,
+  23783: 1,
+  89788: 1,
+  76456: 1,
+  20806: 1,
+  36793: 1,
+  99438: 1,
+  45725: 10,
+};
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
@@ -49,7 +81,7 @@ io.on("connection", (socket) => {
         rooms[roomId].players.push({ id: socket.id, name: userName });
 
         validrooms[roomId]--;
-  
+
         console.log(
           `Room ${roomId} created and joined by ${userName} (${socket.id})`
         );
@@ -68,7 +100,6 @@ io.on("connection", (socket) => {
       });
     }
   });
-  
 
   socket.on("joinRoom", ({ roomId, userName }) => {
     if (rooms[roomId]) {
@@ -98,10 +129,10 @@ io.on("connection", (socket) => {
   });
   socket.on("gameOver", (data) => {
     const { roomId } = data;
-  
+
     // Emit game over event to all clients in the room
     io.to(roomId).emit("gameOver", { success: true });
-  
+
     // Disconnect both users from the room
     io.socketsLeave(roomId);
   });
@@ -131,8 +162,7 @@ io.on("connection", (socket) => {
         }));
 
         const expectedOutputs = problemData.test_cases.map(
-          (testCase) => testCase.expected_output,
-          
+          (testCase) => testCase.expected_output
         );
 
         const results = await Promise.all(
@@ -140,7 +170,7 @@ io.on("connection", (socket) => {
             submitCodeAndCheckResult(submission, expectedOutputs[index])
           )
         );
-        console.log(results)
+        console.log(results);
 
         // Evaluate results
         const allPassed = results.every(
@@ -150,11 +180,11 @@ io.on("connection", (socket) => {
           (result) => result.status === "Time Limit Exceeded"
         );
 
-        console.log(allPassed)
-        console.log(room)
-        console.log(room.winner)
+        console.log(allPassed);
+        console.log(room);
+        console.log(room.winner);
         if (allPassed && room && !room.winner) {
-          console.log("Hello")
+          console.log("Hello");
           room.winner = { id: socket.id, name: userName };
           io.to(roomId).emit("gameResult", {
             winner: room.winner,

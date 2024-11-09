@@ -6,7 +6,14 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName,game }) => {
+const RandomQuestion = ({
+  editorRef,
+  language,
+  socket,
+  roomId,
+  userName,
+  game,
+}) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
@@ -66,7 +73,10 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,game }) 
 
   const runCode = () => {
     if (isButtonDisabled) {
-      toast.error("Please wait 4 seconds before submitting again.", toastOptions);
+      toast.error(
+        "Please wait 4 seconds before submitting again.",
+        toastOptions
+      );
       return; // Don't run code if button is disabled
     }
     const source_code = editorRef.current.getValue();
@@ -88,7 +98,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,game }) 
       language_id,
     });
   };
-  console.log(game)
+  console.log(game);
 
   return (
     <Box w="50%">
@@ -99,7 +109,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,game }) 
         variant="default"
         onClick={runCode}
         className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 mb-4 rounded-md"
-        disabled={!!gameResult || !game || isButtonDisabled}  // Disable button if game is over
+        disabled={!!gameResult || !game || isButtonDisabled} // Disable button if game is over
       >
         Submit
       </Button>
