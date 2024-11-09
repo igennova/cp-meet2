@@ -94,6 +94,15 @@ io.on("connection", (socket) => {
       });
     }
   });
+  socket.on("gameOver", (data) => {
+    const { roomId } = data;
+  
+    // Emit game over event to all clients in the room
+    io.to(roomId).emit("gameOver", { success: true });
+  
+    // Disconnect both users from the room
+    io.socketsLeave(roomId);
+  });
   socket.on(
     "submitCode",
     async ({ problem_id, source_code, language_id, roomId, userName }) => {
