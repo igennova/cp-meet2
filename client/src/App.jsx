@@ -35,7 +35,9 @@ const App = () => {
   useEffect(() => {
     socket.on("gameOver", (data) => {
       if (data.success) {
-        setGameMessage("Time's up! The game has ended. Both players are now disconnected.");
+        setGameMessage(
+          "Time's up! The game has ended. Both players are now disconnected."
+        );
         setIsMatched(false);
       } else {
         setGameMessage("Game Over due to inactivity or time out.");
@@ -145,7 +147,10 @@ const App = () => {
         ) : (
           <div className="flex items-center justify-center min-h-screen">
             <div className="w-full max-w-md p-4 space-y-4">
-              <HyperText className="text-4xl font-bold text-white" text="1V1 DSA BATTLE" />
+              <HyperText
+                className="text-4xl font-bold text-white"
+                text="1V1 DSA BATTLE"
+              />
               <Input
                 type="text"
                 placeholder="Enter Your Name"

@@ -1,4 +1,4 @@
-import Question from "../models/question.js";
+import Question from "../Models/question.js";
 
 const getRandomQuestion = async (req, res) => {
   try {

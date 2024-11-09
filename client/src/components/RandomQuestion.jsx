@@ -66,7 +66,10 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
 
   const runCode = () => {
     if (isButtonDisabled) {
-      toast.error("Please wait 4 seconds before submitting again.", toastOptions);
+      toast.error(
+        "Please wait 4 seconds before submitting again.",
+        toastOptions
+      );
       return; // Don't run code if button is disabled
     }
     const source_code = editorRef.current.getValue();
