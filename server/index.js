@@ -10,7 +10,7 @@ import Question from "./models/question.js";
 import {
   submitCodeAndCheckResult,
   checkSubmissionResult,
-} from "./controllers/judge0.js";
+} from "./Controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
 const app = express();
 app.use(express.json());
@@ -28,26 +28,45 @@ const io = new Server(server, {
 });
 
 const rooms = {}; // Store game room status
-
+const validrooms={
+  95169: 1, 57239: 1, 75303: 1, 76667: 1, 72080: 1,
+  11989: 1, 26521: 1, 26411: 1, 36902: 1, 56908: 1,
+  13707: 1, 43171: 1, 85435: 1, 99574: 1, 86490: 1,
+  81412: 1, 15758: 1, 13125: 1, 78568: 1, 84373: 1,
+  59944: 1, 77177: 1, 47776: 1, 82294: 1, 59506: 1,
+  30175: 1, 30452: 1, 87626: 1, 65260: 1, 57023: 1
+}
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
   socket.on("createRoom", ({ roomId, userName }) => {
-    if (!rooms[roomId]) {
-      rooms[roomId] = { winner: null, players: [] };
-      socket.join(roomId);
-      rooms[roomId].players.push({ id: socket.id, name: userName });
-      console.log(
-        `Room ${roomId} created and joined by ${userName} (${socket.id})`
-      );
-      socket.emit("roomCreated", { success: true });
+    if (validrooms[roomId] && validrooms[roomId] > 0) {
+      if (!rooms[roomId]) {
+        rooms[roomId] = { winner: null, players: [] };
+        socket.join(roomId);
+        rooms[roomId].players.push({ id: socket.id, name: userName });
+
+        validrooms[roomId]--;
+  
+        console.log(
+          `Room ${roomId} created and joined by ${userName} (${socket.id})`
+        );
+        socket.emit("roomCreated", { success: true });
+      } else {
+        socket.emit("roomCreated", {
+          success: false,
+          message: "Room already exists",
+        });
+      }
     } else {
+      // If the roomId is not valid or has already been used
       socket.emit("roomCreated", {
         success: false,
-        message: "Room already exists",
+        message: "Invalid or exhausted roomId",
       });
     }
   });
+  
 
   socket.on("joinRoom", ({ roomId, userName }) => {
     if (rooms[roomId]) {
@@ -101,7 +120,8 @@ io.on("connection", (socket) => {
         }));
 
         const expectedOutputs = problemData.test_cases.map(
-          (testCase) => testCase.expected_output
+          (testCase) => testCase.expected_output,
+          
         );
 
         const results = await Promise.all(
@@ -109,6 +129,7 @@ io.on("connection", (socket) => {
             submitCodeAndCheckResult(submission, expectedOutputs[index])
           )
         );
+        console.log(results)
 
         // Evaluate results
         const allPassed = results.every(
@@ -118,7 +139,11 @@ io.on("connection", (socket) => {
           (result) => result.status === "Time Limit Exceeded"
         );
 
+        console.log(allPassed)
+        console.log(room)
+        console.log(room.winner)
         if (allPassed && room && !room.winner) {
+          console.log("Hello")
           room.winner = { id: socket.id, name: userName };
           io.to(roomId).emit("gameResult", {
             winner: room.winner,
@@ -151,6 +176,7 @@ io.on("connection", (socket) => {
       if (playerIndex !== -1) {
         // Remove the disconnected player from the room
         room.players.splice(playerIndex, 1);
+        delete rooms[roomId];
         socket.to(roomId).emit("playerDisconnected", { playerId: socket.id });
 
         // Check if the room is now empty, and if so, delete it
