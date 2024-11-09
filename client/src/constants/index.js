@@ -4,8 +4,6 @@ export const LANGUAGE_VERSIONS = {
   python2: "2.7.18",
   python: "3.10.0",
   c: "10.2.0",
-  csharp: "6.12.0",
-  javascript: "18.15.0",
   typescript: "5.0.3",
 };
 
@@ -16,8 +14,8 @@ export const language_ID = {
   "c-clang": 104,
   "c-clang-7": 75,
   "c++-clang": 76,
-  "c-gcc": 103,
-  "c++-gcc": 105,
+  "c": 103,
+  "c++": 105,
   "c-gcc-7": 48,
   "c++-gcc-7": 52,
   "c-gcc-8": 49,
@@ -58,9 +56,9 @@ export const language_ID = {
   "php-8": 98,
   "plain-text": 43,
   "prolog": 69,
-  "python-2.7": 70,
+  "python2": 70,
   "python-3.11": 92,
-  "python-3.12": 100,
+  "python": 100,
   "python-3.8": 71,
   "r-4.0": 80,
   "r-4.4": 99,
@@ -71,7 +69,7 @@ export const language_ID = {
   "swift": 83,
   "typescript-3.7": 74,
   "typescript-5": 94,
-  "typescript-5.6": 101,
+  "typescript": 101,
   "visual-basic-net": 84
 };
 
