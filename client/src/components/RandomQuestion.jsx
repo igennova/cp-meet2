@@ -6,11 +6,12 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName,game }) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
-  const [fetchError, setFetchError] = useState(false); // New state to track fetch error
+  const [fetchError, setFetchError] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false); // New state to track fetch error
   const toastOptions = {
     position: "bottom-right",
     autoClose: 5000,
@@ -64,12 +65,20 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   }, [socket, userName]);
 
   const runCode = () => {
+    if (isButtonDisabled) {
+      toast.error("Please wait 4 seconds before submitting again.", toastOptions);
+      return; // Don't run code if button is disabled
+    }
     const source_code = editorRef.current.getValue();
     if (!source_code) {
       toast.error("Please enter your code to submit.", toastOptions);
       return;
     }
     const language_id = language_ID[language];
+    setIsButtonDisabled(true); // Disable the button
+    setTimeout(() => {
+      setIsButtonDisabled(false); // Re-enable button after 4 seconds
+    }, 7000); // 4000ms = 4 seconds
 
     socket.emit("submitCode", {
       roomId,
@@ -79,6 +88,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       language_id,
     });
   };
+  console.log(game)
 
   return (
     <Box w="50%">
@@ -89,7 +99,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         variant="default"
         onClick={runCode}
         className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 mb-4 rounded-md"
-        disabled={!!gameResult} // Disable button if game is over
+        disabled={!!gameResult || !game || isButtonDisabled}  // Disable button if game is over
       >
         Submit
       </Button>

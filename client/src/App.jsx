@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { Footer, CodeEditor } from "@/components";
 import { Box } from "@chakra-ui/react";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
 const socket = io("http://localhost:5000");
 import { toast, ToastContainer } from "react-toastify";
+
 const App = () => {
   const [roomId, setRoomId] = useState("");
   const [userName, setUserName] = useState("");
@@ -13,25 +14,36 @@ const App = () => {
   const [isRoomJoined, setIsRoomJoined] = useState(false);
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
+  const [timeup, setTimeUp] = useState(false);
 
-  const [time, setTime] = useState(300);
+  const [time, setTime] = useState(5);
 
   useEffect(() => {
     let timer;
-    if (isMatched && time > 0) {
+    if (isMatched && time > 0 && !timeup) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
     } else if (time === 0) {
-      // setTime(0);
-      console.log("Time's up");
       toast.info("Time's up");
-
-      socket.disconnect();
+      setTimeUp(true);
     }
 
     return () => clearInterval(timer);
-  }, [isMatched, time]);
+  }, [isMatched, time, timeup]);
+
+  useEffect(() => {
+    socket.on("gameOver", (data) => {
+      if (data.success) {
+        setGameMessage("Time's up! The game has ended. Both players are now disconnected.");
+        setIsMatched(false);
+      } else {
+        setGameMessage("Game Over due to inactivity or time out.");
+      }
+    });
+
+    return () => socket.off("gameOver");
+  }, []);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -60,14 +72,13 @@ const App = () => {
       }
     });
 
-    // Listen for 'startGame' event to show the CodeEditor
     socket.on("startGame", () => {
-      setIsMatched(true); // Set matched state to true to display CodeEditor
+      setIsMatched(true);
     });
 
-    socket.on("playerDisconnected", (data) => {
-      setGameMessage("Your opponent has disconnected,Create a new Room");
-      setIsMatched(false); // Reset matched state if a player disconnects
+    socket.on("playerDisconnected", () => {
+      setGameMessage("Your opponent has disconnected, Create a new Room.");
+      setIsMatched(false);
     });
 
     return () => socket.off(); // Clean up event listeners on component unmount
@@ -75,11 +86,8 @@ const App = () => {
 
   const createRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
-
-    if (Number.isInteger(parsedRoomId)) {
-      if (roomId && userName) {
-        socket.emit("createRoom", { roomId: roomId, userName });
-      }
+    if (Number.isInteger(parsedRoomId) && roomId && userName) {
+      socket.emit("createRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
@@ -87,11 +95,8 @@ const App = () => {
 
   const joinRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
-
-    if (Number.isInteger(parsedRoomId)) {
-      if (roomId && userName) {
-        socket.emit("joinRoom", { roomId: roomId, userName });
-      }
+    if (Number.isInteger(parsedRoomId) && roomId && userName) {
+      socket.emit("joinRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
@@ -107,13 +112,13 @@ const App = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                strokeWidth="1.5"
                 stroke="currentColor"
                 className="h-6 mr-3 text-white sm:h-9"
               >
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
                 />
               </svg>
@@ -122,25 +127,25 @@ const App = () => {
               </div>
             </div>
           </Link>
-          {isMatched ? (
+          {isMatched && !timeup ? (
             <div className="text-2xl font-medium text-white">
               {formatTime(time)}
             </div>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </nav>
-        {isMatched ? (
+
+        {timeup ? (
+          <div className="text-center text-4xl text-white py-8">
+            Time's Up! The game is over.
+          </div>
+        ) : isMatched ? (
           <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
-            <CodeEditor socket={socket} roomId={roomId} userName={userName} />
+            <CodeEditor socket={socket} roomId={roomId} userName={userName} game={isMatched} />
           </Box>
         ) : (
           <div className="flex items-center justify-center min-h-screen">
             <div className="w-full max-w-md p-4 space-y-4">
-              <HyperText
-                className="text-4xl font-bold text-white dark:text-white"
-                text="1V1 DSA BATTLE"
-              />
+              <HyperText className="text-4xl font-bold text-white" text="1V1 DSA BATTLE" />
               <Input
                 type="text"
                 placeholder="Enter Your Name"
@@ -170,14 +175,14 @@ const App = () => {
                 Join Room
               </Button>
               <GradualSpacing
-                className="font-display text-center text-4xl font-bold -tracking-widest  text-white dark:text-white md:text-7xl md:leading-[5rem]"
+                className="font-display text-center text-4xl font-bold -tracking-widest text-white"
                 text={gameMessage}
               />
             </div>
           </div>
         )}
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </BrowserRouter>
   );
 };
