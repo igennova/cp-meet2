@@ -25,6 +25,7 @@ const io = new Server(server, {
     allowedHeaders: ["my-custom-header"],
     credentials: true,
   },
+  transports: ["websocket", "polling"],
 });
 
 const rooms = {}; // Store game room status
@@ -140,14 +141,16 @@ io.on("connection", (socket) => {
     "submitCode",
     async ({ problem_id, source_code, language_id, roomId, userName }) => {
       const room = rooms[roomId];
-
+     
+      
       if (!problem_id || !source_code || !language_id) {
         socket.emit("error", {
           message: "Missing problem_id, source_code, or language_id",
         });
+    
         return;
       }
-
+      
       try {
         const problemData = await Question.findOne({ question_id: problem_id });
         if (!problemData) {
