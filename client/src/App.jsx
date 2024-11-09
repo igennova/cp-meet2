@@ -16,7 +16,7 @@ const App = () => {
   const [isMatched, setIsMatched] = useState(false);
   const [timeup, setTimeUp] = useState(false);
 
-  const [time, setTime] = useState(5);
+  const [time, setTime] = useState(360);
 
   useEffect(() => {
     let timer;
