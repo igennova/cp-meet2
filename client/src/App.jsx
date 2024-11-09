@@ -66,7 +66,7 @@ const App = () => {
     });
 
     socket.on("playerDisconnected", (data) => {
-      setGameMessage("Your opponent has disconnected.");
+      setGameMessage("Your opponent has disconnected,Create a new Room");
       setIsMatched(false); // Reset matched state if a player disconnects
     });
 
