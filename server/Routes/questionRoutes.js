@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import getQuestionById from "../controllers/questionController.js";
+import getQuestionById from "../Controllers/questionController.js";
 
 router.get("/questions", getQuestionById);
 
