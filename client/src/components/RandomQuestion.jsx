@@ -6,7 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
@@ -92,7 +92,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
     });
   };
 
-
   return (
     <Box w="50%">
       <Text mb={2} fontSize="lg">
@@ -102,14 +101,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
         variant="default"
         onClick={runCode}
         className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 mb-4 rounded-md"
-        disabled={!!gameResult|| isButtonDisabled}  
+        disabled={!!gameResult || isButtonDisabled}
       >
         Submit
       </Button>
       <Box
         height="75vh"
         p={2}
-        color={fetchError ? "red.400" : ""} 
+        color={fetchError ? "red.400" : ""}
         border="1px solid"
         borderRadius={4}
         borderColor={fetchError ? "red.500" : "#333"} // Use fetchError to set borderColor

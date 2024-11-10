@@ -14,7 +14,7 @@ export const language_ID = {
   "c-clang": 104,
   "c-clang-7": 75,
   "c++-clang": 76,
-  "c": 103,
+  c: 103,
   "c++": 105,
   "c-gcc-7": 48,
   "c++-gcc-7": 52,
@@ -55,10 +55,10 @@ export const language_ID = {
   "php-7": 68,
   "php-8": 98,
   "plain-text": 43,
-  "prolog": 69,
-  "python2": 70,
+  prolog: 69,
+  python2: 70,
   "python-3.11": 92,
-  "python": 100,
+  python: 100,
   "python-3.8": 71,
   "r-4.0": 80,
   "r-4.4": 99,
@@ -69,8 +69,8 @@ export const language_ID = {
   swift: 83,
   "typescript-3.7": 74,
   "typescript-5": 94,
-  "typescript": 101,
-  "visual-basic-net": 84
+  typescript: 101,
+  "visual-basic-net": 84,
 };
 
 export const CODE_SNIPPETS = {
