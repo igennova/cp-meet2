@@ -6,12 +6,15 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
   const [fetchError, setFetchError] = useState(false);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false); // New state to track fetch error
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [submissionCount, setSubmissionCount] = useState(0);
+
+  const MAX_SUBMISSIONS = 3;
   const toastOptions = {
     position: "bottom-right",
     autoClose: 5000,
@@ -19,6 +22,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
     draggable: true,
     theme: "dark",
   };
+
   useEffect(() => {
     const fetchQuestion = async (roomId) => {
       try {
@@ -26,7 +30,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
         const response = await axios.get(routes.questionroute, {
           params: { problemId },
         });
-        console.log(problemId);
         setProblem_id(response.data.question_id);
         setQuestion(response.data);
       } catch (error) {
@@ -37,10 +40,9 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
     };
 
     fetchQuestion(roomId);
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
-    console.log(typeof roomId);
     socket.on("gameResult", (data) => {
       if (data.winner && data.winner.name === userName) {
         setGameResult("You won the game!");
@@ -50,6 +52,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
         toast.info("You lost the game.");
       }
     });
+
     socket.on("results", (data) => {
       if (data.message === "Hidden test case failed") {
         toast.warning("Hidden test case failed.", toastOptions);
@@ -58,40 +61,54 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
       }
     });
 
+    socket.on("submissionLimitReached", (data) => {
+      if (data.user === userName) {
+        setGameResult("You've used all your submissions.");
+        toast.error("No more submissions allowed. Game over.", toastOptions);
+      } else {
+        setGameResult(`${data.user} has exhausted their submissions. You win!`);
+        toast.success("Your opponent used all their submissions. You win!", toastOptions);
+      }
+    });
+
     return () => {
       socket.off("results");
       socket.off("gameResult");
+      socket.off("submissionLimitReached");
     };
   }, [socket, userName]);
 
   const runCode = () => {
     if (isButtonDisabled) {
-      toast.error(
-        "Please wait 4 seconds before submitting again.",
-        toastOptions
-      );
-      return; // Don't run code if button is disabled
+      toast.error("Please wait 4 seconds before submitting again.", toastOptions);
+      return;
     }
+    if (submissionCount >= MAX_SUBMISSIONS) {
+      setGameResult("You have reached the maximum number of submissions.");
+      toast.error("Game over. No more submissions allowed.", toastOptions);
+      socket.emit("submissionLimitReached", { roomId, user: userName });
+      return;
+    }
+
     const source_code = editorRef.current.getValue();
     if (!source_code) {
       toast.error("Please enter your code to submit.", toastOptions);
       return;
     }
+
     const language_id = language_ID[language];
-    setIsButtonDisabled(true); // Disable the button
-    setTimeout(() => {
-      setIsButtonDisabled(false); // Re-enable button after 4 seconds
-    }, 7000); // 4000ms = 4 seconds
+    setIsButtonDisabled(true);
+    setSubmissionCount((prevCount) => prevCount + 1);
+    setTimeout(() => setIsButtonDisabled(false), 2000);
 
     socket.emit("submitCode", {
       roomId,
       userName,
-      problem_id: problem_id,
+      problem_id,
       source_code,
       language_id,
     });
   };
-
 
   return (
     <Box w="50%">
@@ -102,26 +119,27 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName}) => {
         variant="default"
         onClick={runCode}
         className="font-inter font-medium bg-[#6469ff] text-white px-4 py-2 mb-4 rounded-md"
-        disabled={!!gameResult|| isButtonDisabled}  
+        disabled={!!gameResult || isButtonDisabled}
       >
         Submit
       </Button>
+      <Text color="white" mb={2}>
+        Submissions remaining: {MAX_SUBMISSIONS - submissionCount}
+      </Text>
       <Box
         height="75vh"
         p={2}
-        color={fetchError ? "red.400" : ""} 
+        color={fetchError ? "red.400" : ""}
         border="1px solid"
         borderRadius={4}
-        borderColor={fetchError ? "red.500" : "#333"} // Use fetchError to set borderColor
+        borderColor={fetchError ? "red.500" : "#333"}
         overflowY="auto"
         bg="#1E1E1E"
       >
-        {gameResult ? ( // Display game result message
+        {gameResult ? (
           <GradualSpacing
             className={`font-display text-center text-4xl font-bold -tracking-widest  text-white dark:text-white md:text-7xl md:leading-[5rem] ${
-              gameResult === "You won the game!"
-                ? "text-green-500"
-                : "text-red-500"
+              gameResult === "You won the game!" ? "text-green-500" : "text-red-500"
             }`}
             text={gameResult}
           />
