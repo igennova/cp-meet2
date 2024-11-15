@@ -1,7 +1,6 @@
 export const LANGUAGE_VERSIONS = {
   "c++": "10.2.0",
   java: "15.0.2",
-  python2: "2.7.18",
   python: "3.10.0",
   c: "10.2.0",
   typescript: "5.0.3",
@@ -87,7 +86,7 @@ export const CODE_SNIPPETS = {
   typescript: 'console.log("Hello, World!");',
 };
 
-const localhost = `http://localhost:5000`;
+const localhost = `https://cp-buddy-4ngv.onrender.com`;
 
 export const routes = {
   localhost,

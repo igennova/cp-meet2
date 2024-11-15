@@ -21,7 +21,7 @@ const CodeEditor = ({ socket, roomId, userName, game }) => {
   };
   const onSelect = (language) => {
     setLanguage(language);
-    // setValue(CODE_SNIPPETS[language]);
+ ;
   };
 
   return (
