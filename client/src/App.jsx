@@ -4,7 +4,7 @@ import { Footer, CodeEditor, Navbar } from "@/components";
 import { Box } from "@chakra-ui/react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
-const socket = io("http://localhost:5000");
+const socket = io("https://cp-buddy-4ngv.onrender.com");
 import { toast, ToastContainer } from "react-toastify";
 import { Home, Rules } from "@/pages";
 
