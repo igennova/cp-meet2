@@ -87,8 +87,7 @@ const App = () => {
 
   const createRoom = () => {
     const parsedRoomId = /^\d+$/.test(roomId) ? parseInt(roomId, 10) : null;
-    if (Number.isInteger(parsedRoomId) && roomId && userName) {
-      socket.emit("createRoom", { roomId, userName });
+    if (parsedRoomId !== null && roomId && userName) {
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
