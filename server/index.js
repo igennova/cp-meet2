@@ -8,8 +8,7 @@ import * as dotenv from "dotenv";
 import Question from "./Models/question.js";
 
 import {
-  submitCodeAndCheckResult,
-  checkSubmissionResult,
+  submitCodeAndCheckResult
 } from "./Controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
 const app = express();
@@ -29,59 +28,56 @@ const io = new Server(server, {
 });
 
 const rooms = {}; // Store game room status
-const validrooms = {
-  95169: 1,
-  57239: 1,
-  75303: 1,
-  76667: 1,
-  72080: 1,
-  11989: 1,
-  26521: 1,
-  26411: 1,
-  36902: 1,
-  56908: 1,
-  13707: 1,
-  43171: 1,
-  85435: 1,
-  99574: 1,
-  86490: 1,
-  81412: 1,
-  15758: 1,
-  13125: 1,
-  78568: 1,
-  84373: 1,
-  59944: 1,
-  77177: 1,
-  47776: 1,
-  82294: 1,
-  59506: 1,
-  30175: 1,
-  30452: 1,
-  87626: 1,
-  65260: 1,
-  57023: 1,
-  89567: 1,
-  30281: 1,
-  24789: 1,
-  23783: 1,
-  89788: 1,
-  76456: 1,
-  20806: 1,
-  36793: 1,
-  99438: 1,
-  45725: 10,
-};
+// const validrooms = {
+//   95169: 1,
+//   57239: 1,
+//   75303: 1,
+//   76667: 1,
+//   72080: 1,
+//   11989: 1,
+//   26521: 1,
+//   26411: 1,
+//   36902: 1,
+//   56908: 1,
+//   13707: 1,
+//   43171: 1,
+//   85435: 1,
+//   99574: 1,
+//   86490: 1,
+//   81412: 1,
+//   15758: 1,
+//   13125: 1,
+//   78568: 1,
+//   84373: 1,
+//   59944: 1,
+//   77177: 1,
+//   47776: 1,
+//   82294: 1,
+//   59506: 1,
+//   30175: 1,
+//   30452: 1,
+//   87626: 1,
+//   65260: 1,
+//   57023: 1,
+//   89567: 1,
+//   30281: 1,
+//   24789: 1,
+//   23783: 1,
+//   89788: 1,
+//   76456: 1,
+//   20806: 1,
+//   36793: 1,
+//   99438: 1,
+//   45725: 10,
+// };
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
   socket.on("createRoom", ({ roomId, userName }) => {
-    if (validrooms[roomId] && validrooms[roomId] > 0) {
       if (!rooms[roomId]) {
         rooms[roomId] = { winner: null, players: [] };
         socket.join(roomId);
         rooms[roomId].players.push({ id: socket.id, name: userName });
-
-        validrooms[roomId]--;
 
         console.log(
           `Room ${roomId} created and joined by ${userName} (${socket.id})`
@@ -93,14 +89,9 @@ io.on("connection", (socket) => {
           message: "Room already exists",
         });
       }
-    } else {
-      // If the roomId is not valid or has already been used
-      socket.emit("roomCreated", {
-        success: false,
-        message: "Invalid or exhausted roomId",
-      });
+     
     }
-  });
+  );
 
   socket.on("joinRoom", ({ roomId, userName }) => {
     if (rooms[roomId]) {
@@ -157,26 +148,37 @@ io.on("connection", (socket) => {
           return;
         }
 
-        const submissions = problemData.test_cases.map((testCase) => ({
-          language_id,
-          source_code: Buffer.from(source_code).toString("base64"),
-          stdin: Buffer.from(testCase.input.join("\n")).toString("base64"),
-        }));
+      const submissions = problemData.test_cases.map((testCase) => {
+  // Original Python source code as a string
+  const plainSourceCode = source_code.trim();
 
+  // Encode source code, stdin, and expected output to base64
+  const encodedSourceCode = Buffer.from(plainSourceCode).toString("base64");
+  const encodedStdin = Buffer.from(testCase.input.join("\n")).toString("base64");
+  const encodedExpectedOutput = Buffer.from(testCase.expected_output).toString("base64");
+
+
+
+  return {
+    language_id,
+    source_code: encodedSourceCode,
+    stdin: encodedStdin,
+    expected_output: encodedExpectedOutput
+  };
+});
+
+        
         const expectedOutputs = problemData.test_cases.map(
           (testCase) => testCase.expected_output
         );
 
-        const results = await Promise.all(
-          submissions.map((submission, index) =>
-            submitCodeAndCheckResult(submission, expectedOutputs[index])
-          )
-        );
+        const results = await submitCodeAndCheckResult(submissions, expectedOutputs);
         console.log(results);
 
         // Evaluate results
+        
         const allPassed = results.every(
-          (result) => result.status === "Right Answer"
+          (result) => result.isCorrect === true
         );
         const timeLimitExceeded = results.some(
           (result) => result.status === "Time Limit Exceeded"
