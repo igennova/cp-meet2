@@ -6,7 +6,7 @@ import {
   MenuItem,
   MenuList,
   Text,
-  Flex
+  Flex,
 } from "@chakra-ui/react";
 import { LANGUAGE_VERSIONS } from "@/constants";
 

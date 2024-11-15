@@ -126,8 +126,8 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         Hello,{" "}
         <Text as="span" fontWeight="bold" color="white" display="inline">
           {userName}!
-        </Text>
-        {" "}Welcome to the challenge!
+        </Text>{" "}
+        Welcome to the challenge!
       </Text>
 
       <Button
