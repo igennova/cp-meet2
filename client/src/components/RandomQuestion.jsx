@@ -108,7 +108,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
     setTimeout(() => setIsButtonDisabled(false), 2000);
 
     toast.warning(
-      `Submissions remaining: ${MAX_SUBMISSIONS - submissionCount}`,
+      `Submissions remaining: ${MAX_SUBMISSIONS - submissionCount - 1}`,
       toastOptions
     );
     socket.emit("submitCode", {
