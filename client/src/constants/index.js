@@ -1,7 +1,6 @@
 export const LANGUAGE_VERSIONS = {
   "c++": "10.2.0",
   java: "15.0.2",
-  python2: "2.7.18",
   python: "3.10.0",
   c: "10.2.0",
   typescript: "5.0.3",
