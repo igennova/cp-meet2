@@ -34,7 +34,6 @@ const CodeEditor = ({ socket, roomId, userName, game }) => {
           socket={socket}
           roomId={roomId}
           userName={userName}
-     
         />
         <Box w="50%">
           <LanguageSelector language={language} onSelect={onSelect} />
