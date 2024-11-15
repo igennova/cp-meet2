@@ -131,11 +131,6 @@ const App = () => {
               createRoom={createRoom}
               joinRoom={joinRoom}
               socket={socket}
-              CodeEditor={CodeEditor}
-              HyperText={HyperText}
-              Input={Input}
-              Button={Button}
-              GradualSpacing={GradualSpacing}
             />
           }
         />
