@@ -21,7 +21,6 @@ const CodeEditor = ({ socket, roomId, userName, game }) => {
   };
   const onSelect = (language) => {
     setLanguage(language);
- ;
   };
 
   return (
