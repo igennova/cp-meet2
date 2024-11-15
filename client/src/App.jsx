@@ -96,13 +96,14 @@ const App = () => {
 
 
   const joinRoom = () => {
-    const parsedRoomId = parseInt(roomId, 10);
-    if (Number.isInteger(parsedRoomId)&& parsedRoomId.toString() === roomId && roomId && userName) {
-      socket.emit("joinRoom", { roomId, userName });
+    const parsedRoomId = /^\d+$/.test(roomId) ? parseInt(roomId, 10) : null;
+
+    if (parsedRoomId !== null && roomId && userName) {
+      socket.emit("joinRoom", { roomId: parsedRoomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
-  };
+  }    
 
   return (
     <BrowserRouter>
