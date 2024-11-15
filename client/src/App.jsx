@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { Navbar } from "@/components";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
-const socket = io("https://cp-buddy-4ngv.onrender.com");
+const socket = io("http://localhost:5000");
 import { toast, ToastContainer } from "react-toastify";
 import { Home } from "@/pages";
 
