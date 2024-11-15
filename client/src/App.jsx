@@ -86,8 +86,8 @@ const App = () => {
   }, []);
 
   const createRoom = () => {
-    const parsedRoomId = /^\d+$/.test(roomId) ? parseInt(roomId, 10) : null;
-    if (parsedRoomId !== null && roomId && userName) {
+    const parsedRoomId = parseInt(roomId, 10);
+    if (Number.isInteger(parsedRoomId) && parsedRoomId.toString() === roomId&& roomId && userName) {
       socket.emit("createRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
@@ -96,14 +96,13 @@ const App = () => {
 
 
   const joinRoom = () => {
-    const parsedRoomId = /^\d+$/.test(roomId) ? parseInt(roomId, 10) : null;
-
-    if (parsedRoomId !== null && roomId && userName) {
-      socket.emit("joinRoom", { roomId: parsedRoomId, userName });
+    const parsedRoomId = parseInt(roomId, 10);
+    if (Number.isInteger(parsedRoomId) && parsedRoomId.toString() === roomId && roomId && userName) {
+      socket.emit("joinRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
-  }    
+  };
 
   return (
     <BrowserRouter>
