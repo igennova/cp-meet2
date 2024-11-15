@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui";
+import { Rules } from "@/pages";
 import { Link } from "react-router-dom";
 
 const Navbar = ({ isMatched, timeup, formatTime, time }) => {
@@ -32,11 +32,12 @@ const Navbar = ({ isMatched, timeup, formatTime, time }) => {
           </div>
         ) : null}
 
-        <Link to="/rules">
+        {/* <Link to="/rules">
           <Button className="w-full font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md">
             Rules
           </Button>
-        </Link>
+        </Link> */}
+        <Rules />
       </div>
     </nav>
   );

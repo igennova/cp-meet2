@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
 const socket = io("https://cp-buddy-4ngv.onrender.com");
 import { toast, ToastContainer } from "react-toastify";
-import { Home, Rules } from "@/pages";
+import { Home } from "@/pages";
 
 const App = () => {
   const [roomId, setRoomId] = useState("");
@@ -135,7 +135,7 @@ const App = () => {
           }
         />
 
-        <Route path="/rules" element={<Rules />} />
+        {/* <Route path="/rules" element={<DialogDemo />} /> */}
       </Routes>
     </BrowserRouter>
   );
