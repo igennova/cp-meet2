@@ -90,19 +90,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       return;
     }
     if (submissionCount >= MAX_SUBMISSIONS) {
-      socket.on("gameResult", (data) => {
-        if (data.winner && data.winner.name === userName) {
-          setGameResult("You won the game!");
-          toast.success("Congratulations! You won the game!", toastOptions);
-        } else {
-          setGameResult("You lost the game.");
-          toast.info("You lost the game.");
-        }
-      });
+      if (submissionCount >= MAX_SUBMISSIONS) {
+        setGameResult("You lost.");
+        toast.error("Game over. No more submissions allowed.", toastOptions);
   
-     
-      return;
-    }
+        return;
+  
+    
+      }}
 
     const source_code = editorRef.current.getValue();
     if (!source_code) {
