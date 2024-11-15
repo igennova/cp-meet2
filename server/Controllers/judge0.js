@@ -4,172 +4,115 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const arr = {
-  "C++ (GCC 14.1.0)": 105,
-  "Python (3.12.5)": 100,
-};
 
-const getcode = async (req, res) => {
-  const { problem_id, source_code, language_id, roomId, userName } = req.body;
 
-  const io = req.app.get("io");
-  const userSocket = io.sockets.sockets.get(req.sessionID);
-  const activeRooms = getactiveRoom();
-
-  if (!userSocket) {
-    res.status(404).json({ message: "Socket not found" });
-    return;
-  }
-
-  if (!problem_id || !source_code || !language_id) {
-    userSocket.emit("error", {
-      message: "Missing problem_id, source_code, or language_id",
-    });
-    return;
-  }
-
-  try {
-    const problemData = await Question.findOne({ question_id: problem_id });
-    if (!problemData) {
-      userSocket.emit("error", { message: "Problem not found" });
-      return;
-    }
-
-    const submissions = problemData.test_cases.map((testCase) => ({
-      language_id,
-      source_code: Buffer.from(source_code).toString("base64"),
-      stdin: Buffer.from(testCase.input.join("\n")).toString("base64"),
-    }));
-
-    const expectedOutputs = problemData.test_cases.map(
-      (testCase) => testCase.expected_output
-    );
-
-    const results = await Promise.all(
-      submissions.map((submission, index) =>
-        submitCodeAndCheckResult(submission, expectedOutputs[index])
-      )
-    );
-
-    const allPassed = results.every(
-      (result) => result.status === "Right Answer"
-    );
-
-    if (allPassed) {
-      userSocket.emit("gameResult", { status: "win", message: "You win!" });
-      const opponentId = Object.keys(activeRooms).find(
-        (id) => id !== userSocket.id && activeRooms[id] === roomId
-      );
-      if (opponentId) {
-        const opponentSocket = io.sockets.sockets.get(opponentId);
-        if (opponentSocket) {
-          opponentSocket.emit("gameResult", {
-            status: "lose",
-            message: "You lost!",
-          });
-        }
-      }
-    }
-
-    userSocket.emit("results", {
-      message: "Submissions processed successfully",
-      results,
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    userSocket.emit("error", { message: "Server error", error: error.message });
-  }
-};
+const getcode = async (req, res) => {};
 
 // Modify submitCodeAndCheckResult to accept expectedOutput for comparison
-export const submitCodeAndCheckResult = async (submission, expectedOutput) => {
-  const url =
-    "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&fields=*";
+export const submitCodeAndCheckResult = async (submissions, expectedOutputs) => {
+  const url = "https://judge0-ce.p.sulu.sh/submissions/batch?base64_encoded=true&fields=*";
 
   const options = {
     method: "POST",
     headers: {
-      "x-rapidapi-key": process.env.JUDGE_KEY,
-      "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
       "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${process.env.SULU_API_KEY}`, // Use your actual API key
     },
-    body: JSON.stringify(submission),
+    body: JSON.stringify({
+      submissions,
+      base64_encoded: true, // Enable Base64 encoding for responses
+    }),
   };
 
+  console.log(submissions);
+
   try {
-    // Send the submission
     const response = await fetch(url, options);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Submission Error:", errorText);
+      return { error: errorText };
+    }
+
     const submissionData = await response.json();
 
-    // Extract submission ID
-    const submissionId = submissionData.token;
+    // Check if submissionData is valid and contains tokens
+    if (!Array.isArray(submissionData) || submissionData.length === 0) {
+      console.error("Unexpected response format or empty submission data:", submissionData);
+      return { error: "API response does not contain submissions or is incorrectly formatted" };
+    }
 
-    // Check the submission result and compare it with the expected output
-    return await checkSubmissionResult(submissionId, expectedOutput);
+    // Extract tokens safely
+    const submissionTokens = submissionData.map((submission) => submission.token).filter(Boolean);
+    
+    if (submissionTokens.length === 0) {
+      console.error("No valid tokens received:", submissionData);
+      return { error: "No valid tokens received from API" };
+    }
+
+    console.log(submissionTokens);
+
+    return await checkSubmissionResults(submissionTokens, expectedOutputs);
   } catch (error) {
     console.error("Error submitting code:", error);
     return { error: "Error submitting code" };
   }
 };
 
+
 // Modify checkSubmissionResult to accept expectedOutput for comparison
-export const checkSubmissionResult = async (submissionId, expectedOutput) => {
-  const resultUrl = `https://judge0-ce.p.rapidapi.com/submissions/${submissionId}?base64_encoded=true&fields=*`;
+const checkSubmissionResults = async (tokens, expectedOutputs, maxRetries = 5, delay = 2000) => {
+  const url = `https://judge0-ce.p.sulu.sh/submissions/batch?tokens=${tokens.join(",")}&base64_encoded=true`; // Enable Base64 encoding for results
 
-  const options = {
-    method: "GET",
-    headers: {
-      "x-rapidapi-key": process.env.JUDGE_KEY,
-      "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
-    },
-  };
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, { method: "GET" });
+      const results = await response.json();
+      // console.log(results);
 
-  try {
-    let resultData;
-
-    while (true) {
-      const response = await fetch(resultUrl, options);
-      resultData = await response.json();
-
-      const statusId = resultData.status.id;
-
-      if (statusId === 3) {
-        // Compare Judge0 output with expected output
-        const decodedOutput = atob(resultData.stdout).trim();
-
-        // Trim the expected output as well
-        const trimmedExpectedOutput = expectedOutput.trim();
-
-        // Compare Judge0 output with expected output
-        const isCorrect = decodedOutput === trimmedExpectedOutput;
-        console.log(isCorrect ? "Correct" : "Wrong");
-        console.log("Expected Output:", trimmedExpectedOutput);
-        console.log("Judge0 Output:", decodedOutput);
-
-        return {
-          status: isCorrect ? "Right Answer" : "Wrong Answer",
-          output: decodedOutput,
-          expected_output: trimmedExpectedOutput,
-        };
-      } else if (statusId === 5) {
-        return {
-          status: "Wrong Answer",
-          expected_output: expectedOutput,
-          your_output: resultData.stdout,
-        };
-      } else if (statusId === 6) {
-        return { status: "Time Limit Exceeded" };
-      } else if (statusId >= 7) {
-        return { status: "Error", description: resultData.status.description };
+      // Check if results have the expected structure and contain submissions
+      if (!results.submissions || !Array.isArray(results.submissions)) {
+        console.error("Error: Invalid results from API:", results);
+        return { error: "Invalid results from Judge0 API" };
       }
 
-      // If still in queue or running, wait and retry
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Process submissions and decode Base64 output
+      const processedResults = results.submissions.map((result, index) => {
+        const decodedStdout = result.stdout ? Buffer.from(result.stdout, 'base64').toString('utf-8').trim() : null;
+        const isCorrect = decodedStdout === expectedOutputs[index];
+        
+        return {
+          isCorrect: result.status.id === 3 ? isCorrect : null, // Only mark correct if status is 'Accepted'
+          output: decodedStdout,
+          expected: expectedOutputs[index],
+          status: result.status?.description || "Unknown",
+          error: result.stderr || result.compile_output || result.message || null,
+        };
+      });
+
+      // Check if all submissions have completed processing
+      const allProcessed = processedResults.every(
+        (result) => result.status !== 'In Queue' && result.status !== 'Processing'
+      );
+
+      if (allProcessed) {
+        return processedResults;
+      }
+
+      // Wait before retrying if not all are processed
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    } catch (error) {
+      console.error("Error checking submission result:", error);
+      return { error: "Error checking submission result" };
     }
-  } catch (error) {
-    console.error("Error checking submission result:", error);
-    return { error: "Error checking submission result" };
   }
+
+  // Return partial or queued results if max retries reached
+  console.warn("Warning: Max retries reached, some submissions may still be pending.");
+  return { error: "Some submissions may still be pending", results: null };
 };
+
 
 export default getcode;
