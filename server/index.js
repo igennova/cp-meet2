@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 const io = new Server(server, {
   cors: {
-    origin: "https://cp-buddy-t80e.onrender.com",
+    origin: ["https://cp-buddy-t80e.onrender.com","http://localhost:3000"],
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true,

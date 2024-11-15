@@ -86,7 +86,7 @@ export const CODE_SNIPPETS = {
   typescript: 'console.log("Hello, World!");',
 };
 
-const localhost = `https://cp-buddy-4ngv.onrender.com`;
+const localhost = `http://localhost:5000`;
 
 export const routes = {
   localhost,
