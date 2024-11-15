@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const Rules = ({ selectedLanguage }) => {
+const Rules = () => {
   const rules = [
     "You should take input as per the given format and print the output.",
     "You can select the language you desire from the dropdown menu.",

@@ -138,9 +138,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       >
         Submit
       </Button>
-      {/* <Text color="white" mb={2}>
-        Submissions remaining: {MAX_SUBMISSIONS - submissionCount}
-      </Text> */}
       <Box
         height="75vh"
         p={2}

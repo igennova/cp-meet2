@@ -31,12 +31,6 @@ const Navbar = ({ isMatched, timeup, formatTime, time }) => {
             {formatTime(time)}
           </div>
         ) : null}
-
-        {/* <Link to="/rules">
-          <Button className="w-full font-medium bg-[#6469ff] text-white px-4 py-2 rounded-md">
-            Rules
-          </Button>
-        </Link> */}
         <Rules />
       </div>
     </nav>
