@@ -90,9 +90,17 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       return;
     }
     if (submissionCount >= MAX_SUBMISSIONS) {
-      setGameResult("You have reached the maximum number of submissions.");
-      toast.error("Game over. No more submissions allowed.", toastOptions);
-      socket.emit("submissionLimitReached", { roomId, user: userName });
+      socket.on("gameResult", (data) => {
+        if (data.winner && data.winner.name === userName) {
+          setGameResult("You won the game!");
+          toast.success("Congratulations! You won the game!", toastOptions);
+        } else {
+          setGameResult("You lost the game.");
+          toast.info("You lost the game.");
+        }
+      });
+  
+     
       return;
     }
 
