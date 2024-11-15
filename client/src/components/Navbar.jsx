@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Navbar = ({ isMatched, timeup, formatTime, time }) => {
   return (
-    <nav className="w-full fixed top-0 z-10 flex justify-between items-center sm:px-8 px-4 py-4 border-b border-b-gray-500">
+    <nav className="w-full flex justify-between items-center sm:px-8 px-4 py-4 border-b border-b-gray-500">
       <Link to="/">
         <div className="flex items-center space-x-4">
           <svg
@@ -25,7 +25,7 @@ const Navbar = ({ isMatched, timeup, formatTime, time }) => {
           </div>
         </div>
       </Link>
-      <div>
+      <div className="flex justify-center items-center space-x-4">
         {isMatched && !timeup ? (
           <div className="text-2xl font-medium text-white">
             {formatTime(time)}

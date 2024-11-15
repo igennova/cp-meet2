@@ -1,4 +1,7 @@
 import React from "react";
+import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
+import { Box } from "@chakra-ui/react";
+import { CodeEditor } from "@/components";
 
 const Home = ({
   timeup,
@@ -13,11 +16,6 @@ const Home = ({
   createRoom,
   joinRoom,
   socket,
-  CodeEditor,
-  HyperText,
-  Input,
-  Button,
-  GradualSpacing,
 }) => {
   return (
     <>
