@@ -67,7 +67,10 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         toast.error("No more submissions allowed. Game over.", toastOptions);
       } else {
         setGameResult(`${data.user} has exhausted their submissions. You win!`);
-        toast.success("Your opponent used all their submissions. You win!", toastOptions);
+        toast.success(
+          "Your opponent used all their submissions. You win!",
+          toastOptions
+        );
       }
     });
 
@@ -80,7 +83,10 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
 
   const runCode = () => {
     if (isButtonDisabled) {
-      toast.error("Please wait 4 seconds before submitting again.", toastOptions);
+      toast.error(
+        "Please wait 4 seconds before submitting again.",
+        toastOptions
+      );
       return;
     }
     if (submissionCount >= MAX_SUBMISSIONS) {
@@ -139,7 +145,9 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         {gameResult ? (
           <GradualSpacing
             className={`font-display text-center text-4xl font-bold -tracking-widest  text-white dark:text-white md:text-7xl md:leading-[5rem] ${
-              gameResult === "You won the game!" ? "text-green-500" : "text-red-500"
+              gameResult === "You won the game!"
+                ? "text-green-500"
+                : "text-red-500"
             }`}
             text={gameResult}
           />

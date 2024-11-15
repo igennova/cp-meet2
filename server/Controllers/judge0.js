@@ -4,13 +4,15 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-
-
 const getcode = async (req, res) => {};
 
 // Modify submitCodeAndCheckResult to accept expectedOutput for comparison
-export const submitCodeAndCheckResult = async (submissions, expectedOutputs) => {
-  const url = "https://judge0-ce.p.sulu.sh/submissions/batch?base64_encoded=true&fields=*";
+export const submitCodeAndCheckResult = async (
+  submissions,
+  expectedOutputs
+) => {
+  const url =
+    "https://judge0-ce.p.sulu.sh/submissions/batch?base64_encoded=true&fields=*";
 
   const options = {
     method: "POST",
@@ -40,13 +42,21 @@ export const submitCodeAndCheckResult = async (submissions, expectedOutputs) => 
 
     // Check if submissionData is valid and contains tokens
     if (!Array.isArray(submissionData) || submissionData.length === 0) {
-      console.error("Unexpected response format or empty submission data:", submissionData);
-      return { error: "API response does not contain submissions or is incorrectly formatted" };
+      console.error(
+        "Unexpected response format or empty submission data:",
+        submissionData
+      );
+      return {
+        error:
+          "API response does not contain submissions or is incorrectly formatted",
+      };
     }
 
     // Extract tokens safely
-    const submissionTokens = submissionData.map((submission) => submission.token).filter(Boolean);
-    
+    const submissionTokens = submissionData
+      .map((submission) => submission.token)
+      .filter(Boolean);
+
     if (submissionTokens.length === 0) {
       console.error("No valid tokens received:", submissionData);
       return { error: "No valid tokens received from API" };
@@ -61,10 +71,16 @@ export const submitCodeAndCheckResult = async (submissions, expectedOutputs) => 
   }
 };
 
-
 // Modify checkSubmissionResult to accept expectedOutput for comparison
-const checkSubmissionResults = async (tokens, expectedOutputs, maxRetries = 5, delay = 2000) => {
-  const url = `https://judge0-ce.p.sulu.sh/submissions/batch?tokens=${tokens.join(",")}&base64_encoded=true`; // Enable Base64 encoding for results
+const checkSubmissionResults = async (
+  tokens,
+  expectedOutputs,
+  maxRetries = 5,
+  delay = 2000
+) => {
+  const url = `https://judge0-ce.p.sulu.sh/submissions/batch?tokens=${tokens.join(
+    ","
+  )}&base64_encoded=true`; // Enable Base64 encoding for results
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -80,21 +96,25 @@ const checkSubmissionResults = async (tokens, expectedOutputs, maxRetries = 5, d
 
       // Process submissions and decode Base64 output
       const processedResults = results.submissions.map((result, index) => {
-        const decodedStdout = result.stdout ? Buffer.from(result.stdout, 'base64').toString('utf-8').trim() : null;
+        const decodedStdout = result.stdout
+          ? Buffer.from(result.stdout, "base64").toString("utf-8").trim()
+          : null;
         const isCorrect = decodedStdout === expectedOutputs[index];
-        
+
         return {
           isCorrect: result.status.id === 3 ? isCorrect : null, // Only mark correct if status is 'Accepted'
           output: decodedStdout,
           expected: expectedOutputs[index],
           status: result.status?.description || "Unknown",
-          error: result.stderr || result.compile_output || result.message || null,
+          error:
+            result.stderr || result.compile_output || result.message || null,
         };
       });
 
       // Check if all submissions have completed processing
       const allProcessed = processedResults.every(
-        (result) => result.status !== 'In Queue' && result.status !== 'Processing'
+        (result) =>
+          result.status !== "In Queue" && result.status !== "Processing"
       );
 
       if (allProcessed) {
@@ -110,9 +130,10 @@ const checkSubmissionResults = async (tokens, expectedOutputs, maxRetries = 5, d
   }
 
   // Return partial or queued results if max retries reached
-  console.warn("Warning: Max retries reached, some submissions may still be pending.");
+  console.warn(
+    "Warning: Max retries reached, some submissions may still be pending."
+  );
   return { error: "Some submissions may still be pending", results: null };
 };
-
 
 export default getcode;

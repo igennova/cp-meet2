@@ -58,7 +58,7 @@ export const language_ID = {
   prolog: 69,
   python2: 70,
   "python-3.11": 92,
-  "python": 71,
+  python: 71,
 
   "python-3.8": 71,
   "r-4.0": 80,

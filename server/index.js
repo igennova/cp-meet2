@@ -7,9 +7,7 @@ import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import Question from "./Models/question.js";
 
-import {
-  submitCodeAndCheckResult
-} from "./Controllers/judge0.js";
+import { submitCodeAndCheckResult } from "./Controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
 const app = express();
 app.use(express.json());
@@ -74,24 +72,22 @@ io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
   socket.on("createRoom", ({ roomId, userName }) => {
-      if (!rooms[roomId]) {
-        rooms[roomId] = { winner: null, players: [] };
-        socket.join(roomId);
-        rooms[roomId].players.push({ id: socket.id, name: userName });
+    if (!rooms[roomId]) {
+      rooms[roomId] = { winner: null, players: [] };
+      socket.join(roomId);
+      rooms[roomId].players.push({ id: socket.id, name: userName });
 
-        console.log(
-          `Room ${roomId} created and joined by ${userName} (${socket.id})`
-        );
-        socket.emit("roomCreated", { success: true });
-      } else {
-        socket.emit("roomCreated", {
-          success: false,
-          message: "Room already exists",
-        });
-      }
-     
+      console.log(
+        `Room ${roomId} created and joined by ${userName} (${socket.id})`
+      );
+      socket.emit("roomCreated", { success: true });
+    } else {
+      socket.emit("roomCreated", {
+        success: false,
+        message: "Room already exists",
+      });
     }
-  );
+  });
 
   socket.on("joinRoom", ({ roomId, userName }) => {
     if (rooms[roomId]) {
@@ -148,38 +144,41 @@ io.on("connection", (socket) => {
           return;
         }
 
-      const submissions = problemData.test_cases.map((testCase) => {
-  // Original Python source code as a string
-  const plainSourceCode = source_code.trim();
+        const submissions = problemData.test_cases.map((testCase) => {
+          // Original Python source code as a string
+          const plainSourceCode = source_code.trim();
 
-  // Encode source code, stdin, and expected output to base64
-  const encodedSourceCode = Buffer.from(plainSourceCode).toString("base64");
-  const encodedStdin = Buffer.from(testCase.input.join("\n")).toString("base64");
-  const encodedExpectedOutput = Buffer.from(testCase.expected_output).toString("base64");
+          // Encode source code, stdin, and expected output to base64
+          const encodedSourceCode =
+            Buffer.from(plainSourceCode).toString("base64");
+          const encodedStdin = Buffer.from(testCase.input.join("\n")).toString(
+            "base64"
+          );
+          const encodedExpectedOutput = Buffer.from(
+            testCase.expected_output
+          ).toString("base64");
 
+          return {
+            language_id,
+            source_code: encodedSourceCode,
+            stdin: encodedStdin,
+            expected_output: encodedExpectedOutput,
+          };
+        });
 
-
-  return {
-    language_id,
-    source_code: encodedSourceCode,
-    stdin: encodedStdin,
-    expected_output: encodedExpectedOutput
-  };
-});
-
-        
         const expectedOutputs = problemData.test_cases.map(
           (testCase) => testCase.expected_output
         );
 
-        const results = await submitCodeAndCheckResult(submissions, expectedOutputs);
+        const results = await submitCodeAndCheckResult(
+          submissions,
+          expectedOutputs
+        );
         console.log(results);
 
         // Evaluate results
-        
-        const allPassed = results.every(
-          (result) => result.isCorrect === true
-        );
+
+        const allPassed = results.every((result) => result.isCorrect === true);
         const timeLimitExceeded = results.some(
           (result) => result.status === "Time Limit Exceeded"
         );
