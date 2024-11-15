@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-import { Footer, CodeEditor, Navbar } from "@/components";
-import { Box } from "@chakra-ui/react";
+import { Navbar } from "@/components";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
-const socket = io("http://localhost:5000");
+const socket = io("https://cp-buddy-4ngv.onrender.com");
 import { toast, ToastContainer } from "react-toastify";
-import { Home, Rules } from "@/pages";
+import { Home } from "@/pages";
 
 const App = () => {
   const [roomId, setRoomId] = useState("");
@@ -131,16 +130,9 @@ const App = () => {
               createRoom={createRoom}
               joinRoom={joinRoom}
               socket={socket}
-              CodeEditor={CodeEditor}
-              HyperText={HyperText}
-              Input={Input}
-              Button={Button}
-              GradualSpacing={GradualSpacing}
             />
           }
         />
-
-        <Route path="/rules" element={<Rules />} />
       </Routes>
     </BrowserRouter>
   );

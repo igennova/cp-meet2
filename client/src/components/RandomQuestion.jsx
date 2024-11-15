@@ -96,6 +96,10 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
     setSubmissionCount((prevCount) => prevCount + 1);
     setTimeout(() => setIsButtonDisabled(false), 2000);
 
+    toast.warning(
+      `Submissions remaining: ${MAX_SUBMISSIONS - submissionCount - 1}`,
+      toastOptions
+    );
     socket.emit("submitCode", {
       roomId,
       userName,
@@ -107,9 +111,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
 
   return (
     <Box w="50%">
-      <Text mb={2} fontSize="lg">
-        Random Question Hello {userName}
+      <Text mb={2} fontSize="lg" color="whiteAlpha.700">
+        Hello,{" "}
+        <Text as="span" fontWeight="bold" color="white" display="inline">
+          {userName}!
+        </Text>{" "}
+        Welcome to the challenge!
       </Text>
+
       <Button
         variant="default"
         onClick={runCode}
@@ -118,9 +127,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       >
         Submit
       </Button>
-      <Text color="white" mb={2}>
-        Submissions remaining: {MAX_SUBMISSIONS - submissionCount}
-      </Text>
       <Box
         height="75vh"
         p={2}
