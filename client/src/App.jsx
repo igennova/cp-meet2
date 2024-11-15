@@ -15,6 +15,14 @@ const App = () => {
   const [isMatched, setIsMatched] = useState(false);
   const [timeup, setTimeUp] = useState(false);
 
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 10000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
+
   const [time, setTime] = useState(360);
 
   useEffect(() => {
@@ -96,8 +104,9 @@ const App = () => {
       socket.emit("createRoom", { roomId, userName });
       const message = `Hey there,\n\nI just created a room for an epic 1v1 DSA Battle! 💻⚔️\nThink you've got what it takes to beat me? 😏\n\nHere's the link to join:\n👉 https://cp-buddy-t80e.onrender.com\n\n*Room ID: ${roomId}*\n\nLet's see who's the real coding champ! 🏆 Don't keep me waiting. 😉`;
       navigator.clipboard.writeText(message);
-      alert(
-        "Room created successfully! An invitation message has been copied to your clipboard. Share with your friends to invite them."
+      toast.success(
+        "Room created successfully! An invitation message has been copied to your clipboard. Share with your friends to invite them.",
+        toastOptions
       );
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
@@ -126,6 +135,8 @@ const App = () => {
         formatTime={formatTime}
         time={time}
       />
+
+      <ToastContainer />
 
       <Routes>
         <Route
