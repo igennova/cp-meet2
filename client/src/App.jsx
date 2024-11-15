@@ -87,16 +87,17 @@ const App = () => {
 
   const createRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
-    if (Number.isInteger(parsedRoomId) && roomId && userName) {
+    if (Number.isInteger(parsedRoomId) && parsedRoomId.toString() === roomId&& roomId && userName) {
       socket.emit("createRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
   };
 
+
   const joinRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
-    if (Number.isInteger(parsedRoomId) && roomId && userName) {
+    if (Number.isInteger(parsedRoomId) && parsedRoomId.toString() === roomId && roomId && userName) {
       socket.emit("joinRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");

@@ -61,23 +61,12 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       }
     });
 
-    socket.on("submissionLimitReached", (data) => {
-      if (data.user === userName) {
-        setGameResult("You've used all your submissions.");
-        toast.error("No more submissions allowed. Game over.", toastOptions);
-      } else {
-        setGameResult(`${data.user} has exhausted their submissions. You win!`);
-        toast.success(
-          "Your opponent used all their submissions. You win!",
-          toastOptions
-        );
-      }
-    });
-
+    
+  
     return () => {
       socket.off("results");
       socket.off("gameResult");
-      socket.off("submissionLimitReached");
+    
     };
   }, [socket, userName]);
 
@@ -90,11 +79,14 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       return;
     }
     if (submissionCount >= MAX_SUBMISSIONS) {
-      setGameResult("You have reached the maximum number of submissions.");
-      toast.error("Game over. No more submissions allowed.", toastOptions);
-      socket.emit("submissionLimitReached", { roomId, user: userName });
-      return;
-    }
+      if (submissionCount >= MAX_SUBMISSIONS) {
+        setGameResult("You lost.");
+        toast.error("Game over. No more submissions allowed.", toastOptions);
+  
+        return;
+  
+    
+      }}
 
     const source_code = editorRef.current.getValue();
     if (!source_code) {
