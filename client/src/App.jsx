@@ -94,7 +94,7 @@ const App = () => {
       userName
     ) {
       socket.emit("createRoom", { roomId, userName });
-      const message = `Hey there,\n\nI just created a room for an epic 1v1 DSA Battle! 💻⚔️\nThink you've got what it takes to beat me? 😏\n\nHere's the link to join:\n👉 https://cp-buddy-t80e.onrender.com\n\nRoom ID: ${roomId}\n\nLet's see who's the real coding champ! 🏆 Don't keep me waiting. 😉`;
+      const message = `Hey there,\n\nI just created a room for an epic 1v1 DSA Battle! 💻⚔️\nThink you've got what it takes to beat me? 😏\n\nHere's the link to join:\n👉 https://cp-buddy-t80e.onrender.com\n\n*Room ID: ${roomId}*\n\nLet's see who's the real coding champ! 🏆 Don't keep me waiting. 😉`;
       navigator.clipboard.writeText(message);
       alert(
         "Room created successfully! An invitation message has been copied to your clipboard. Share with your friends to invite them."
