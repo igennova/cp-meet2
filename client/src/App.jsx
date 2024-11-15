@@ -87,7 +87,12 @@ const App = () => {
 
   const createRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
-    if (Number.isInteger(parsedRoomId) && parsedRoomId.toString() === roomId&& roomId && userName) {
+    if (
+      Number.isInteger(parsedRoomId) &&
+      parsedRoomId.toString() === roomId &&
+      roomId &&
+      userName
+    ) {
       socket.emit("createRoom", { roomId, userName });
       const message = `Hey there,\n\nI just created a room for an epic 1v1 DSA Battle! 💻⚔️\nThink you've got what it takes to beat me? 😏\n\nHere's the link to join:\n👉 https://cp-buddy-t80e.onrender.com\n\nRoom ID: ${roomId}\n\nLet's see who's the real coding champ! 🏆 Don't keep me waiting. 😉`;
       navigator.clipboard.writeText(message);
@@ -99,10 +104,14 @@ const App = () => {
     }
   };
 
-
   const joinRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
-    if (Number.isInteger(parsedRoomId) && parsedRoomId.toString() === roomId && roomId && userName) {
+    if (
+      Number.isInteger(parsedRoomId) &&
+      parsedRoomId.toString() === roomId &&
+      roomId &&
+      userName
+    ) {
       socket.emit("joinRoom", { roomId, userName });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");

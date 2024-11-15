@@ -61,12 +61,9 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       }
     });
 
-    
-  
     return () => {
       socket.off("results");
       socket.off("gameResult");
-    
     };
   }, [socket, userName]);
 
@@ -82,11 +79,10 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       if (submissionCount >= MAX_SUBMISSIONS) {
         setGameResult("You lost.");
         toast.error("Game over. No more submissions allowed.", toastOptions);
-  
+
         return;
-  
-    
-      }}
+      }
+    }
 
     const source_code = editorRef.current.getValue();
     if (!source_code) {
