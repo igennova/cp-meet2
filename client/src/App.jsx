@@ -14,7 +14,6 @@ const App = () => {
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
   const [timeup, setTimeUp] = useState(false);
-  const [isTimerRunning, setIsTimerRunning] = useState(true);
 
   const toastOptions = {
     position: "bottom-right",
@@ -28,18 +27,17 @@ const App = () => {
 
   useEffect(() => {
     let timer;
-    if (isMatched && time > 0 && !timeup && isTimerRunning) {
+    if (isMatched && time > 0 && !timeup ) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
     } else if (time === 0) {
       toast.info("Time's up");
       setTimeUp(true);
-      setIsTimerRunning(false);
     }
 
     return () => clearInterval(timer);
-  }, [isMatched, time, timeup, isTimerRunning]);
+  }, [isMatched, time, timeup]);
 
   useEffect(() => {
     socket.on("gameOver", (data) => {
@@ -157,7 +155,7 @@ const App = () => {
               createRoom={createRoom}
               joinRoom={joinRoom}
               socket={socket}
-              setIsTimerRunning={setIsTimerRunning}
+            
             />
           }
         />
