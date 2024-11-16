@@ -6,7 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName,setIsTimerRunning }) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
@@ -26,7 +26,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   useEffect(() => {
     const fetchQuestion = async (roomId) => {
       try {
-        const problemId = (roomId % 10) + 1;
+        const problemId = (roomId % 11) + 1;
         const response = await axios.get(routes.questionroute, {
           params: { problemId },
         });
@@ -51,6 +51,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         setGameResult("You lost the game.");
         toast.info("You lost the game.");
       }
+      setIsTimerRunning(false);
     });
 
     socket.on("results", (data) => {
