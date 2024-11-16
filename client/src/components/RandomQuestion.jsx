@@ -18,7 +18,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const toastOptions = {
     position: "bottom-right",
     autoClose: 5000,
-    pauseOnHover: true,
     draggable: true,
     theme: "dark",
   };
@@ -26,7 +25,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   useEffect(() => {
     const fetchQuestion = async (roomId) => {
       try {
-        const problemId = (roomId % 10) + 1;
+        const problemId = (roomId % 11) + 1;
         const response = await axios.get(routes.questionroute, {
           params: { problemId },
         });
@@ -44,13 +43,18 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
 
   useEffect(() => {
     socket.on("gameResult", (data) => {
-      if (data.winner && data.winner.name === userName) {
+      if (data.winner && data.winner.id ===socket.id) {
         setGameResult("You won the game!");
         toast.success("Congratulations! You won the game!", toastOptions);
+  
+       
       } else {
         setGameResult("You lost the game.");
-        toast.info("You lost the game.");
+        toast.info("You lost the game.",toastOptions);
+  
+       
       }
+   
     });
 
     socket.on("results", (data) => {
