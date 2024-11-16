@@ -6,13 +6,14 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName ,timerRunning, setTimerRunning}) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
   const [fetchError, setFetchError] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [submissionCount, setSubmissionCount] = useState(0);
+
 
   const MAX_SUBMISSIONS = 3;
   const toastOptions = {
@@ -47,9 +48,11 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       if (data.winner && data.winner.name === userName) {
         setGameResult("You won the game!");
         toast.success("Congratulations! You won the game!", toastOptions);
+        setTimerRunning(false);
       } else {
         setGameResult("You lost the game.");
         toast.info("You lost the game.");
+        setTimerRunning(false);
       }
     });
 
@@ -68,7 +71,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
       socket.off("gameResult");
       socket.off("submissionLimitReached");
     };
-  }, [socket, userName]);
+  }, [socket, userName,setTimerRunning]);
 
   const runCode = () => {
     if (isButtonDisabled) {

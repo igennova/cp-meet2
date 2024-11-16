@@ -15,12 +15,12 @@ const App = () => {
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
   const [timeup, setTimeUp] = useState(false);
-
   const [time, setTime] = useState(360);
+  const [timerRunning, setTimerRunning] = useState(true);
 
   useEffect(() => {
     let timer;
-    if (isMatched && time > 0 && !timeup) {
+    if (isMatched && time > 0 && !timeup && timerRunning) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
@@ -30,7 +30,7 @@ const App = () => {
     }
 
     return () => clearInterval(timer);
-  }, [isMatched, time, timeup]);
+  }, [isMatched, time, timeup,timerRunning]);
 
   useEffect(() => {
     socket.on("gameOver", (data) => {
@@ -130,6 +130,8 @@ const App = () => {
               createRoom={createRoom}
               joinRoom={joinRoom}
               socket={socket}
+              setTimerRunning={setTimerRunning}
+              timerRunning={timerRunning}
             />
           }
         />

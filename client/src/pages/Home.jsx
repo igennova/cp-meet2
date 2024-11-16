@@ -16,6 +16,8 @@ const Home = ({
   createRoom,
   joinRoom,
   socket,
+  setTimerRunning,
+  timerRunning
 }) => {
   return (
     <>
@@ -25,7 +27,7 @@ const Home = ({
         </div>
       ) : isMatched ? (
         <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
-          <CodeEditor socket={socket} roomId={roomId} userName={userName} />
+          <CodeEditor socket={socket} roomId={roomId} userName={userName} timerRunning={timerRunning} setTimerRunning={setTimerRunning} />
         </Box>
       ) : (
         <div className="flex items-center justify-center min-h-screen">
