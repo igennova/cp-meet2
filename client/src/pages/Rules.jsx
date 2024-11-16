@@ -20,6 +20,7 @@ const Rules = () => {
     "Whoever solves the problem first is the winner.",
     "Stay fair and enjoy the challenge!",
   ];
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -27,24 +28,26 @@ const Rules = () => {
           Rules
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-black text-gray-200 sm:max-w-[425px] border border-gray-700 shadow-lg">
+      <DialogContent className="bg-black text-gray-200 max-w-[300px] sm:max-w-[425px] w-full p-4 sm:p-6 border border-gray-700 shadow-lg rounded-md">
         <DialogHeader>
-          <DialogTitle className="text-white">1v1 DSA Battle Rules</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-white text-base sm:text-lg">
+            1v1 DSA Battle Rules
+          </DialogTitle>
+          <DialogDescription className="text-gray-400 text-sm sm:text-base">
             Please follow these rules for a fun and fair competition:
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <ul className="list-decimal pl-5 space-y-2">
             {rules.map((rule, index) => (
-              <li key={index} className="text-white">
+              <li key={index} className="text-white text-sm sm:text-base">
                 {rule}
               </li>
             ))}
           </ul>
         </div>
         <DialogFooter>
-          <p className="text-green-500 font-bold text-center w-full">
+          <p className="text-green-500 font-bold text-center w-full text-sm sm:text-base">
             All the best!
           </p>
         </DialogFooter>
