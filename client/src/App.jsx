@@ -28,7 +28,7 @@ const App = () => {
 
   useEffect(() => {
     let timer;
-    if (isMatched && time > 0 && !timeup&& timerRunning) {
+    if (isMatched && time > 0 && !timeup) {
       timer = setInterval(() => {
         setTime((prevTime) => prevTime - 1);
       }, 1000);
