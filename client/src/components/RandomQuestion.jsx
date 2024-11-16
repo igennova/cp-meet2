@@ -49,7 +49,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
         toast.success("Congratulations! You won the game!", toastOptions);
       } else {
         setGameResult("You lost the game.");
-        toast.info("You lost the game.");
+        toast.info("You lost the game.",toastOptions);
       }
     
     });
