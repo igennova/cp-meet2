@@ -6,7 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName,setIsTimerRunning }) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
@@ -51,7 +51,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,setIsTim
         setGameResult("You lost the game.");
         toast.info("You lost the game.");
       }
-      setIsTimerRunning(false);
+    
     });
 
     socket.on("results", (data) => {
