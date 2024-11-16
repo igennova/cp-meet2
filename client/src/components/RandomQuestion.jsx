@@ -18,7 +18,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,setIsTim
   const toastOptions = {
     position: "bottom-right",
     autoClose: 5000,
-    pauseOnHover: true,
     draggable: true,
     theme: "dark",
   };
@@ -47,11 +46,13 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,setIsTim
       if (data.winner && data.winner.id ===socket.id) {
         setGameResult("You won the game!");
         toast.success("Congratulations! You won the game!", toastOptions);
+        setIsTimerRunning(false)
       } else {
         setGameResult("You lost the game.");
         toast.info("You lost the game.",toastOptions);
+        setIsTimerRunning(false)
       }
-    setIsTimerRunning(false)
+   
     });
 
     socket.on("results", (data) => {
