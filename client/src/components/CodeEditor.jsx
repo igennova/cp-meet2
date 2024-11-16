@@ -3,7 +3,7 @@ import { Box, HStack } from "@chakra-ui/react";
 import { Editor } from "@monaco-editor/react";
 import { RandomQuestion, LanguageSelector } from "@/components";
 
-const CodeEditor = ({ socket, roomId, userName, game }) => {
+const CodeEditor = ({ socket, roomId, userName, game ,setIsTimerRunning}) => {
   const editorRef = useRef();
   const [value, setValue] = useState("");
   const [language, setLanguage] = useState("python");
@@ -33,7 +33,7 @@ const CodeEditor = ({ socket, roomId, userName, game }) => {
           socket={socket}
           roomId={roomId}
           userName={userName}
-          // setIsTimerRunning={setIsTimerRunning}
+          setIsTimerRunning={setIsTimerRunning}
         />
         <Box w="50%">
           <LanguageSelector language={language} onSelect={onSelect} />
