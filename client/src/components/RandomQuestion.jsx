@@ -6,7 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
-const RandomQuestion = ({ editorRef, language, socket, roomId, userName,timerRunning,setTimerRunning }) => {
+const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
   const [question, setQuestion] = useState(null);
   const [gameResult, setGameResult] = useState(null);
   const [problem_id, setProblem_id] = useState(null);
@@ -69,7 +69,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName,timerRun
       socket.off("results");
       socket.off("gameResult");
     };
-  }, [socket, userName,setTimerRunning]);
+  }, [socket, userName]);
 
   const runCode = () => {
     if (isButtonDisabled) {

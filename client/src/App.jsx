@@ -14,7 +14,7 @@ const App = () => {
   const [gameMessage, setGameMessage] = useState("");
   const [isMatched, setIsMatched] = useState(false);
   const [timeup, setTimeUp] = useState(false);
-  const [timerRunning,setTimerRunning] = useState(true);
+
 
   const toastOptions = {
     position: "bottom-right",
@@ -156,9 +156,7 @@ const App = () => {
               createRoom={createRoom}
               joinRoom={joinRoom}
               socket={socket}
-              timerRunning={timerRunning}
-              setTimerRunning={setTimerRunning}
-            
+              
             />
           }
         />
