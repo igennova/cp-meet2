@@ -44,7 +44,7 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName }) => {
 
   useEffect(() => {
     socket.on("gameResult", (data) => {
-      if (data.winner && data.winner.name === userName) {
+      if (data.winner && data.winner.id ===socket.id) {
         setGameResult("You won the game!");
         toast.success("Congratulations! You won the game!", toastOptions);
       } else {
