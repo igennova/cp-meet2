@@ -15,7 +15,6 @@ const App = () => {
   const [isMatched, setIsMatched] = useState(false);
   const [timeup, setTimeUp] = useState(false);
 
-
   const toastOptions = {
     position: "bottom-right",
     autoClose: 10000,
@@ -156,7 +155,6 @@ const App = () => {
               createRoom={createRoom}
               joinRoom={joinRoom}
               socket={socket}
-              
             />
           }
         />
