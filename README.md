@@ -13,7 +13,7 @@ To run this project, you will need to add the following environment variables to
 
 `MONGODB_URL`
 
-`JUDGE_KEY`
+`SULU_API_KEY`
 
 ## Run Locally
 
