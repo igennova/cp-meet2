@@ -1,5 +1,6 @@
 import { Rules } from "@/pages";
 import { Link } from "react-router-dom";
+import React from "react";
 
 const Navbar = ({ isMatched, timeup, formatTime, time, playerCount, maxPlayers }) => {
   return (

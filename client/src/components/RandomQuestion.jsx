@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { routes, language_ID } from "@/constants";
 import { Box, Text, Button, Badge, HStack, VStack, Divider, Code } from "@chakra-ui/react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GradualSpacing } from "@/components/ui";
 
@@ -288,7 +288,6 @@ const RandomQuestion = ({ editorRef, language, socket, roomId, userName, setTime
           </Box>
         )}
       </Box>
-      <ToastContainer />
     </Box>
   );
 };

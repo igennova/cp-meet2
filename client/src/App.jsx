@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { io } from "socket.io-client";
 import { Navbar } from "@/components";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
-const socket = io("https://cp-buddy-4ngv.onrender.com");
-import { toast, ToastContainer } from "react-toastify";
 import { Home } from "@/pages";
+
+// Initialize socket outside of component to avoid reconnections
+const socket = io("https://cp-buddy-4ngv.onrender.com");
 
 const App = () => {
   const [roomId, setRoomId] = useState("");
@@ -194,7 +197,7 @@ const App = () => {
         maxPlayers={maxPlayers}
       />
 
-      <ToastContainer />
+      <ToastContainer position="top-right" theme="dark" />
 
       <Routes>
         <Route
@@ -222,7 +225,6 @@ const App = () => {
           }
         />
       </Routes>
-      <ToastContainer position="top-right" theme="dark" />
     </BrowserRouter>
   );
 };
