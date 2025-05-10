@@ -51,6 +51,7 @@ const Home = ({
   timerRunning,
   maxPlayers,
   setMaxPlayers,
+  playerCount,
 }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState(null);

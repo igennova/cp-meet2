@@ -217,6 +217,7 @@ const App = () => {
               timerRunning={timerRunning}
               maxPlayers={maxPlayers}
               setMaxPlayers={setMaxPlayers}
+              playerCount={playerCount}
             />
           }
         />
