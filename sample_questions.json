@@ -1,0 +1,28 @@
+[
+    {
+      "question_id": "1",
+      "title": "Find the Missing Number",
+      "description": "You are given all numbers between 1, 2, ..., n except one. Your task is to find the missing number.",
+      "input_format": [
+        "The first input line contains an integer n.",
+        "The second line contains n-1 numbers. Each number is distinct and between 1 and n (inclusive)."
+      ],
+      "output_format": "Print the missing number.",
+      "constraints": {
+        "n_min": 2,
+        "n_max": 200000
+      },
+      "example": {
+        "input": ["5", "2 3 1 5"],
+        "output": "4"
+      },
+      "test_cases": [
+        {
+          "test_case_id": "tc1",
+          "input": ["5", "2 3 1 5"],
+          "expected_output": "4"
+        }
+      ]
+    }
+  ]
+  
