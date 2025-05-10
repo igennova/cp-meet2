@@ -17,6 +17,8 @@ const App = () => {
   const [timeup, setTimeUp] = useState(false);
   const [time, setTime] = useState(360);
   const [timerRunning, setTimerRunning] = useState(true);
+  const [maxPlayers, setMaxPlayers] = useState(2);
+  const [playerCount, setPlayerCount] = useState(1);
 
   useEffect(() => {
     let timer;
@@ -27,24 +29,63 @@ const App = () => {
     } else if (time === 0) {
       toast.info("Time's up");
       setTimeUp(true);
+      setTimerRunning(false);
     }
 
     return () => clearInterval(timer);
-  }, [isMatched, time, timeup,timerRunning]);
+  }, [isMatched, time, timeup, timerRunning]);
 
   useEffect(() => {
     socket.on("gameOver", (data) => {
       if (data.success) {
-        setGameMessage(
-          "Time's up! The game has ended. Both players are now disconnected."
-        );
+        // Use the message from server if available
+        const message = data.message || "Time's up! The game has ended. Players are now disconnected.";
+        setGameMessage(message);
         setIsMatched(false);
+        setTimerRunning(false);
+        console.log("Game over - stopping timer due to time up");
       } else {
         setGameMessage("Game Over due to inactivity or time out.");
+        setTimerRunning(false);
+        console.log("Game over - stopping timer due to inactivity");
       }
     });
 
-    return () => socket.off("gameOver");
+    socket.on("gameResult", (data) => {
+      // Force stop the timer for both players
+      setTimerRunning(false);
+      console.log("Game result received - stopping timer", data.message);
+      
+      // Format message based on winner
+      let resultMessage = data.message;
+      
+      if (data.winner) {
+        const isCurrentUserWinner = data.winner.id === socket.id;
+        
+        if (data.message.includes("ran out of submission attempts")) {
+          resultMessage = isCurrentUserWinner 
+            ? `You won! Your opponent ran out of submission attempts.`
+            : `Game over. You used all your submission attempts.`;
+        } 
+        else if (data.message.includes("disconnected")) {
+          resultMessage = isCurrentUserWinner
+            ? `You won! All other players disconnected.`
+            : `${data.winner.name} won because other players disconnected.`;
+        }
+        else {
+          resultMessage = isCurrentUserWinner
+            ? `Congratulations! You won the game!`
+            : `Game over. ${data.winner.name} won the game.`;
+        }
+      }
+      
+      setGameMessage(resultMessage);
+    });
+
+    return () => {
+      socket.off("gameOver");
+      socket.off("gameResult");
+    };
   }, []);
 
   const formatTime = (seconds) => {
@@ -59,7 +100,9 @@ const App = () => {
     socket.on("roomCreated", (data) => {
       if (data.success) {
         setIsRoomCreated(true);
-        setGameMessage("Room created successfully!");
+        setMaxPlayers(data.maxPlayers);
+        setPlayerCount(1); // Creator is the first player
+        setGameMessage(`Room ${roomId} created successfully for ${data.maxPlayers} players!`);
       } else {
         setGameMessage(data.message);
       }
@@ -68,28 +111,59 @@ const App = () => {
     socket.on("roomJoined", (data) => {
       if (data.success) {
         setIsRoomJoined(true);
-        setGameMessage("Joined room successfully!");
+        setMaxPlayers(data.maxPlayers);
+        setPlayerCount(data.currentPlayers);
+        setGameMessage(`Joined room ${roomId} successfully! (${data.currentPlayers}/${data.maxPlayers} players)`);
       } else {
         setGameMessage(data.message);
       }
     });
 
-    socket.on("startGame", () => {
+    socket.on("playerCountUpdate", (data) => {
+      setPlayerCount(data.count);
+      setGameMessage(`Players: ${data.count}/${data.maxPlayers}. Waiting for more players...`);
+    });
+
+    socket.on("startGame", (data) => {
       setIsMatched(true);
+      setTimerRunning(true);
+      setPlayerCount(data.players.length);
+      console.log("Game started - timer running");
     });
 
-    socket.on("playerDisconnected", () => {
-      setGameMessage("Your opponent has disconnected, Create a new Room.");
-      setIsMatched(false);
+    socket.on("playerDisconnected", (data) => {
+      // Add fallback values if data isn't complete
+      const currentCount = data?.playerCount || 0;
+      const maxCount = data?.maxPlayers || maxPlayers;
+      const playerName = data?.playerName || "A player";
+      
+      // Update player count state with fallback
+      setPlayerCount(currentCount);
+      
+      // More descriptive message with fallbacks
+      if (currentCount <= 1) {
+        setGameMessage(`${playerName} has disconnected. You're the only player left. Create a new room to play again.`);
+        setIsMatched(false);
+        setTimerRunning(false);
+        console.log("Not enough players - stopping timer");
+      } else {
+        setGameMessage(`${playerName} has disconnected. (${currentCount}/${maxCount} players remaining)`);
+      }
     });
 
-    return () => socket.off(); // Clean up event listeners on component unmount
+    return () => {
+      socket.off("roomCreated");
+      socket.off("roomJoined");
+      socket.off("playerCountUpdate");
+      socket.off("startGame");
+      socket.off("playerDisconnected");
+    };
   }, []);
 
   const createRoom = () => {
     const parsedRoomId = parseInt(roomId, 10);
     if (Number.isInteger(parsedRoomId) && roomId && userName) {
-      socket.emit("createRoom", { roomId, userName });
+      socket.emit("createRoom", { roomId, userName, maxPlayers });
     } else {
       setGameMessage("Please enter a valid integer for room ID.");
     }
@@ -111,6 +185,8 @@ const App = () => {
         timeup={timeup}
         formatTime={formatTime}
         time={time}
+        playerCount={playerCount}
+        maxPlayers={maxPlayers}
       />
 
       <Routes>
@@ -132,10 +208,13 @@ const App = () => {
               socket={socket}
               setTimerRunning={setTimerRunning}
               timerRunning={timerRunning}
+              maxPlayers={maxPlayers}
+              setMaxPlayers={setMaxPlayers}
             />
           }
         />
       </Routes>
+      <ToastContainer position="top-right" theme="dark" />
     </BrowserRouter>
   );
 };
