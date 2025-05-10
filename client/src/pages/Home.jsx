@@ -56,10 +56,13 @@ const Home = ({
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState(null);
   const [notificationType, setNotificationType] = useState("info");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 768);
+      const smallScreen = window.innerWidth < 768;
+      setIsSmallScreen(smallScreen);
+      setIsDialogOpen(smallScreen);
     };
 
     checkScreenSize();
@@ -106,7 +109,7 @@ const Home = ({
   return (
     <>
       {isSmallScreen ? (
-        <Dialog open>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent
             className="bg-[#0a0a16] text-gray-200"
             style={{
