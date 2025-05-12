@@ -1,4 +1,5 @@
 import Question from "../Models/question.js";
+// import fs from 'fs';
 
 const getRandomQuestion = async (req, res) => {
   try {
