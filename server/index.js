@@ -6,6 +6,10 @@ import questionRoutes from "./Routes/questionRoutes.js";
 import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import Question from "./Models/question.js";
+import session from "express-session";
+import passport from "passport";
+import "./config/passport-setup.js";
+import authRoutes from "./Routes/auth.js";
 
 import { submitCodeAndCheckResult } from "./Controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
@@ -14,7 +18,43 @@ app.use(express.json());
 const server = http.createServer(app);
 dotenv.config();
 const PORT = process.env.PORT || 5000;
-app.use(cors());
+app.use(cors({
+  origin: ["https://cp-buddy-t80e.onrender.com", "http://localhost:3000"],
+  credentials: true
+}));
+
+// Set up session middleware
+app.use(session({
+  secret: process.env.COOKIE_KEY || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Set up auth routes
+app.use('/auth', authRoutes);
+
+// Test route to verify authentication
+app.get('/', (req, res) => {
+  if (req.user) {
+    res.json({ 
+      message: 'You are logged in!',
+      user: req.user 
+    });
+  } else {
+    res.json({ 
+      message: 'Not logged in',
+      redirectTo: 'http://localhost:3000'
+    });
+  }
+});
+
 const io = new Server(server, {
   cors: {
     origin: ["https://cp-buddy-t80e.onrender.com","http://localhost:3000"],

@@ -1,4 +1,5 @@
 import Home from "./Home";
 import Rules from "./Rules";
+import Dashboard from "./Dashboard";
 
-export { Home, Rules };
+export { Home, Rules, Dashboard };

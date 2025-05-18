@@ -1,6 +1,7 @@
 import { Rules } from "@/pages";
 import { Link } from "react-router-dom";
 import React from "react";
+import GoogleLogin from "./GoogleLogin";
 
 const Navbar = ({ isMatched, timeup, formatTime, time, playerCount, maxPlayers }) => {
   return (
@@ -59,6 +60,7 @@ const Navbar = ({ isMatched, timeup, formatTime, time, playerCount, maxPlayers }
             )}
           </>
         )}
+        <GoogleLogin />
         <Rules />
       </div>
     </nav>

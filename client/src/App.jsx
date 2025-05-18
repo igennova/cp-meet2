@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import { Navbar } from "@/components";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
 import { Home } from "@/pages";
+import { Dashboard } from "@/pages";
 
 // Initialize socket outside of component to avoid reconnections
 const socket = io("https://cp-buddy-4ngv.onrender.com");
@@ -223,6 +224,10 @@ const App = () => {
               playerCount={playerCount}
             />
           }
+        />
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
         />
       </Routes>
     </BrowserRouter>

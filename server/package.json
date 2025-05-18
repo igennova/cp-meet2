@@ -15,9 +15,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "express-session": "^1.18.1",
     "mongoose": "^8.7.3",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.7",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "server": "file:",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
