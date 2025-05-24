@@ -21,7 +21,17 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    social: [{
+        platform: {
+            type: String,
+            required: true
+        },
+        url: {
+            type: String,
+            required: true
+        }
+    }]
 });
 
 export default mongoose.model('User', userSchema); 

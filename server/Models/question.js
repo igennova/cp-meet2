@@ -12,6 +12,7 @@ const questionSchema = new mongoose.Schema({
   question_id: { type: String, required: true, unique: true },
   title: { type: String, required: true },
   description: { type: String, required: true },
+  difficulty: { type: String, required: true },
   input_format: { type: [String], required: true },
   output_format: { type: String, required: true },
   constraints: {
