@@ -51,7 +51,7 @@ app.get('/', (req, res) => {
 
 const io = new Server(server, {
   cors: {
-    origin: ["https://cp-buddy-t80e.onrender.com","http://localhost:3000"],
+    origin: ["https://cp-buddy-t80e.onrender.com","http://localhost:3000","https://cp-nextjs-iota.vercel.app/"],
     methods: ["GET", "POST"],
     credentials: true,
   },

@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import passport from 'passport';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = Router();
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
 // Auth with Google
 router.get('/google', passport.authenticate('google', {
@@ -10,10 +14,10 @@ router.get('/google', passport.authenticate('google', {
 
 // Google auth callback
 router.get('/google/callback', 
-    passport.authenticate('google', { failureRedirect: 'http://localhost:3000/login' }),
+    passport.authenticate('google', { failureRedirect: `${CLIENT_URL}` }),
     (req, res) => {
-        // Redirect to frontend after successful login
-        res.redirect('http://localhost:3000');
+        // Redirect to frontend after authentication (success or failure)
+        res.redirect(CLIENT_URL);
     }
 );
 
@@ -23,7 +27,7 @@ router.get('/logout', (req, res) => {
         if (err) {
             return res.status(500).json({ error: 'Error logging out' });
         }
-        res.redirect('http://localhost:3000');
+        res.redirect(CLIENT_URL);
     });
 });
 
