@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../Models/user.js';
 import { UserRating } from '../Models/rating.js';
 import * as dotenv from 'dotenv';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ passport.use(
     new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: '/auth/google/callback'
+        callbackURL: `${BASE_URL}/auth/google/callback`
     }, async (accessToken, refreshToken, profile, done) => {
         try {
             // Check if user already exists
