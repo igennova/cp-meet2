@@ -1,4 +1,4 @@
-import User from '../Models/User.js';
+import User from '../Models/user.js';
 import { UserRating,Match } from '../Models/rating.js';
 
 // Get user profile

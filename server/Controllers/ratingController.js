@@ -1,5 +1,5 @@
 import { Match, UserRating } from '../Models/rating.js';
-import User from '../Models/User.js';
+import User from '../Models/user.js';
 // Temporary UUID replacement until uuid package is installedconst generateUuid = () => {    return 'xxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g, function(c) {        const r = Math.random() * 16 | 0;        const v = c == 'x' ? r : (r & 0x3 | 0x8);        return v.toString(16);    });};
 
 // ELO Rating calculation constants
