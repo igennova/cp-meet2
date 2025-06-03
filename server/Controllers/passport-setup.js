@@ -6,6 +6,8 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
 passport.serializeUser((user, done) => {
     console.log('Serializing user:', user.id);
     done(null, user.id);
