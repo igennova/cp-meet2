@@ -66,13 +66,27 @@ app.get('/', (req, res) => {
   }
 });
 
+const allowedOrigins = [
+  "https://cp-buddy-t80e.onrender.com",
+  "http://localhost:3000",
+  "https://cp-nextjs-iota.vercel.app"
+];
+
 const io = new Server(server, {
   cors: {
-    origin: ["https://cp-buddy-t80e.onrender.com","http://localhost:3000","https://cp-nextjs-iota.vercel.app"],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
   },
   transports: ["websocket", "polling"],
+  allowEIO3: true,
+  cookie: {
+    name: "io",
+    httpOnly: true,
+    sameSite: "none",
+    secure: process.env.NODE_ENV === "production"
+  }
 });
 
 // Store game room status with added maxPlayers field
