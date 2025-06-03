@@ -6,18 +6,20 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
-
 passport.serializeUser((user, done) => {
+    console.log('Serializing user:', user.id);
     done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
+    console.log('Deserializing user ID:', id);
     User.findById(id)
         .then(user => {
+            console.log('Found user:', user?.email);
             done(null, user);
         })
         .catch(err => {
+            console.error('Deserialize error:', err);
             done(err, null);
         });
 });
