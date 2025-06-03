@@ -9,38 +9,13 @@ const allowedOrigins = [
   "https://cp-nextjs-iota.vercel.app"
 ];
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 const corsOptions = {
-  origin: function(origin, callback) {
-    // Allow WebSocket connections (origin is undefined in WebSocket)
-    // Also allow same-origin requests (origin is null)
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`Blocked request from unauthorized origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Set-Cookie'],
-  maxAge: 86400 // 24 hours
+  exposedHeaders: ['Set-Cookie']
 };
-
-// Apply different settings for development and production
-if (isProduction) {
-  corsOptions.cookie = {
-    sameSite: 'none',
-    secure: true,
-    httpOnly: true
-  };
-}
 
 const corsMiddleware = cors(corsOptions);
 

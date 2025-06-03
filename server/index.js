@@ -76,17 +76,9 @@ const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+    credentials: true
   },
-  transports: ["websocket", "polling"],
-  allowEIO3: true,
-  cookie: {
-    name: "io",
-    httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production"
-  }
+  transports: ["websocket", "polling"]
 });
 
 // Store game room status with added maxPlayers field
