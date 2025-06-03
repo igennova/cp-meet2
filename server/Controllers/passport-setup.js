@@ -6,6 +6,8 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
@@ -24,7 +26,7 @@ passport.use(
     new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: '/auth/google/callback'
+        callbackURL: `${BASE_URL}/auth/google/callback`
     }, async (accessToken, refreshToken, profile, done) => {
         try {
             // Check if user already exists
