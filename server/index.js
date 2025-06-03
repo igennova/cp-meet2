@@ -9,7 +9,7 @@ import * as dotenv from "dotenv";
 import Question from "./Models/question.js";
 import session from "express-session";
 import passport from "passport";
-import "./Controllers/passport-setup.js";
+// import "./Controllers/passport-setup.js";
 import authRoutes from "./Routes/auth.js";
 import profileRoutes from "./Routes/profileRoutes.js";
 import corsMiddleware from "./middleware/cors.js";
