@@ -1,4 +1,5 @@
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -10,6 +11,12 @@ const sessionMiddleware = session({
   secret: process.env.COOKIE_KEY || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URL,
+    ttl: 24 * 60 * 60, // Session TTL in seconds (24 hours)
+    autoRemove: 'native',  // Use MongoDB's TTL index
+    touchAfter: 24 * 3600 // Only update the session every 24 hours unless the data changes
+  }),
   proxy: isProduction, // Trust the reverse proxy when in production
   cookie: {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours

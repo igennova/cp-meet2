@@ -19,10 +19,27 @@ import { UserRating } from "./Models/rating.js";
 
 import { submitCodeAndCheckResult } from "./Controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
+
+dotenv.config();
+
+// Connect to MongoDB first
+console.log('Connecting to MongoDB...');
+await mongoose
+    .connect(process.env.MONGODB_URL)
+    .then(() => console.log("MongoDB Connected Successfully"))
+    .catch((error) => {
+        console.error("MongoDB Connection error:", error);
+        process.exit(1); // Exit if MongoDB connection fails
+    });
+
+// Only import passport setup after MongoDB is connected
+import "./Controllers/passport-setup.js";
+import authRoutes from "./Routes/auth.js";
+import profileRoutes from "./Routes/profileRoutes.js";
+
 const app = express();
 app.use(express.json());
 const server = http.createServer(app);
-dotenv.config();
 const PORT = process.env.PORT || 5000;
 // Use middleware
 app.use(corsMiddleware);
@@ -759,11 +776,6 @@ setInterval(() => {
  
 }
 );
-
-mongoose
-  .connect(process.env.MONGODB_URL)
-  .then(() => console.log("DB Connected"))
-  .catch((error) => console.error("Connection error:", error));
 
 server.listen(PORT, () => {
   console.log(`Server has started on http://localhost:${PORT}`);
