@@ -44,7 +44,7 @@ const PORT = process.env.PORT || 5000;
 // Use middleware
 app.use(corsMiddleware);
 app.use(sessionMiddleware);
-passportMiddleware(app);
+app.use(passportMiddleware);
 const MAX_RATING_DIFFERENCE = 200;
 const RATING_TOLERANCE_INCREASE = 50;
 // Set up auth routes
