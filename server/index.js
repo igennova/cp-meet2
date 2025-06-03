@@ -381,7 +381,42 @@ const getQuestionForDuel = async (player1Rating, player2Rating) => {
     throw new Error('Failed to fetch question');
   }
 };
+function calculateELO(playerRating, opponentRating, playerWon, kFactor = 32) {
+  const expectedScore = 1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
+  const actualScore = playerWon ? 1 : 0;
+  const newRating = Math.round(playerRating + kFactor * (actualScore - expectedScore));
+  const ratingChange = newRating - playerRating;
+  
+  return {
+    newRating: Math.max(100, newRating), // Minimum rating of 100
+    ratingChange
+  };
+}
 
+// Update user rating in database
+async function updateUserRating(userId, newRating, ratingChange) {
+  try {
+    await UserRating.findOneAndUpdate(
+      { userId: userId },
+      { 
+        $set: { 
+          'ratings.BLITZ_2MIN.current': newRating
+        },
+        $max: {
+          'ratings.BLITZ_2MIN.peak': newRating
+        },
+        $inc: { 
+          'ratings.BLITZ_2MIN.matches': 1,
+          [`overall.${ratingChange >= 0 ? 'wins' : 'losses'}`]: 1
+        }
+      },
+      { upsert: true }
+    );
+    console.log(`Updated rating for user ${userId}: ${newRating} (${ratingChange >= 0 ? '+' : ''}${ratingChange})`);
+  } catch (error) {
+    console.error('Error updating user rating:', error);
+  }
+}
 
 // Modified socket handler
 socket.on('joinDuelQueue', async (userData) => {
@@ -397,7 +432,7 @@ socket.on('joinDuelQueue', async (userData) => {
       return;
     }
     
-    const userRating = userFromDB.ratings.BLITZ_2MIN.rating || 1000; // Default rating if not set
+    const userRating = userFromDB.ratings.BLITZ_2MIN.current;
     console.log(`User ${userData.displayName} has rating: ${userRating}`);
     
     // Remove user from queue if already exists (prevent duplicates)
@@ -496,7 +531,209 @@ socket.on('joinDuelQueue', async (userData) => {
     socket.emit('error', { message: 'Failed to join duel queue' });
   }
 });
+socket.on('submitDuelCode', async ({ problem_id, source_code, language_id, roomId, userName }) => {
+  try {
+    const duel = activeDuels.get(roomId);
+    
+    if (!duel) {
+      socket.emit('error', { message: 'Duel room not found' });
+      return;
+    }
+    
+    if (!problem_id || !source_code || !language_id) {
+      socket.emit('error', {
+        message: 'Missing problem_id, source_code, or language_id',
+      });
+      return;
+    }
+    
+    // Find current player in the duel
+    const currentPlayer = duel.players.find(player => player.socketId === socket.id);
+    if (!currentPlayer) {
+      socket.emit('error', { message: 'Player not found in this duel' });
+      return;
+    }
+    
+    console.log(`Code submission from ${userName} in duel ${roomId}`);
+    
+    const problemData = await Question.findOne({ question_id: problem_id });
+    if (!problemData) {
+      socket.emit('error', { message: 'Problem not found' });
+      return;
+    }
+    
+    const submissions = problemData.test_cases.map((testCase) => {
+      const plainSourceCode = source_code.trim();
+      const encodedSourceCode = Buffer.from(plainSourceCode).toString('base64');
+      const encodedStdin = Buffer.from(testCase.input.join('\n')).toString('base64');
+      const encodedExpectedOutput = Buffer.from(testCase.expected_output).toString('base64');
+      
+      return {
+        language_id,
+        source_code: encodedSourceCode,
+        stdin: encodedStdin,
+        expected_output: encodedExpectedOutput,
+      };
+    });
+    
+    const expectedOutputs = problemData.test_cases.map(
+      (testCase) => testCase.expected_output
+    );
+    
+    const results = await submitCodeAndCheckResult(submissions, expectedOutputs);
+    console.log('Submission results:', results);
+    
+    // Evaluate results
+    const allPassed = results.every((result) => result.isCorrect === true);
+    const timeLimitExceeded = results.some(
+      (result) => result.status === 'Time Limit Exceeded'
+    );
+    
+    // Store submission result
+    duel.submissions[socket.id] = {
+      playerId: currentPlayer.userId,
+      playerName: userName,
+      allPassed,
+      timeLimitExceeded,
+      results,
+      submittedAt: Date.now()
+    };
+    
+    console.log(`Submission stored for ${userName}: allPassed=${allPassed}`);
+    
+    if (allPassed && !duel.winner) {
+      // This player won!
+      duel.winner = {
+        id: socket.id,
+        userId: currentPlayer.userId,
+        name: userName,
+        rating: currentPlayer.rating
+      };
+      duel.status = 'completed';
+      
+      const winner = currentPlayer;
+      const loser = duel.players.find(player => player.socketId !== socket.id);
+      
+      // Calculate ELO rating changes
+      const winnerELO = calculateELO(winner.rating, loser.rating, true);
+      const loserELO = calculateELO(loser.rating, winner.rating, false);
+      
+      console.log(`Duel completed! Winner: ${userName}`);
+      console.log(`Rating changes - Winner: ${winner.rating} -> ${winnerELO.newRating} (${winnerELO.ratingChange >= 0 ? '+' : ''}${winnerELO.ratingChange})`);
+      console.log(`Rating changes - Loser: ${loser.rating} -> ${loserELO.newRating} (${loserELO.ratingChange >= 0 ? '+' : ''}${loserELO.ratingChange})`);
+      
+      // Update ratings in database
+      await updateUserRating(winner.userId, winnerELO.newRating, winnerELO.ratingChange);
+      await updateUserRating(loser.userId, loserELO.newRating, loserELO.ratingChange);
+      
+      // Emit game result to both players
+      const gameResult = {
+        winner: {
+          name: userName,
+          userId: winner.userId,
+          oldRating: winner.rating,
+          newRating: winnerELO.newRating,
+          ratingChange: winnerELO.ratingChange
+        },
+        loser: {
+          name: loser.displayName,
+          userId: loser.userId,
+          oldRating: loser.rating,
+          newRating: loserELO.newRating,
+          ratingChange: loserELO.ratingChange
+        },
+        duelId: roomId,
+        completedAt: Date.now()
+      };
+      
+      // Send detailed results to winner
+      io.to(socket.id).emit('duelResult', {
+        ...gameResult,
+        result: 'victory',
+        message: `Congratulations! You won the duel!`,
+        ratingChange: winnerELO.ratingChange,
+        newRating: winnerELO.newRating
+      });
+      
+      // Send detailed results to loser
+      io.to(loser.socketId).emit('duelResult', {
+        ...gameResult,
+        result: 'defeat',
+        message: `${userName} solved the problem first!`,
+        ratingChange: loserELO.ratingChange,
+        newRating: loserELO.newRating
+      });
+      
+      // Clean up the duel after a delay
+      setTimeout(() => {
+        activeDuels.delete(roomId);
+        console.log(`Cleaned up duel room: ${roomId}`);
+      }, 30000); // Clean up after 30 seconds
+      
+    } else if (timeLimitExceeded) {
+      socket.emit('duelSubmissionResult', {
+        success: false,
+        message: 'Time Limit Exceeded on some test cases',
+        results,
+        canRetry: true
+      });
+    } else {
+      socket.emit('duelSubmissionResult', {
+        success: false,
+        message: 'Some test cases failed',
+        results,
+        canRetry: true
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error in submitDuelCode:', error);
+    socket.emit('error', { message: 'Server error', error: error.message });
+  }
+});
 
+// Handle player leaving duel
+socket.on('leaveDuel', (roomId) => {
+  const duel = activeDuels.get(roomId);
+  if (!duel) return;
+  
+  const leavingPlayer = duel.players.find(player => player.socketId === socket.id);
+  if (!leavingPlayer) return;
+  
+  const remainingPlayer = duel.players.find(player => player.socketId !== socket.id);
+  
+  if (remainingPlayer && duel.status !== 'completed') {
+    // Award victory to remaining player
+    duel.winner = {
+      id: remainingPlayer.socketId,
+      userId: remainingPlayer.userId,
+      name: remainingPlayer.displayName,
+      rating: remainingPlayer.rating
+    };
+    duel.status = 'completed';
+    
+    // Calculate ratings (leaving player gets penalty)
+    const winnerELO = calculateELO(remainingPlayer.rating, leavingPlayer.rating, true);
+    const loserELO = calculateELO(leavingPlayer.rating, remainingPlayer.rating, false, 40); // Higher K-factor for leaving
+    
+    // Update ratings
+    updateUserRating(remainingPlayer.userId, winnerELO.newRating, winnerELO.ratingChange);
+    updateUserRating(leavingPlayer.userId, loserELO.newRating, loserELO.ratingChange);
+    
+    // Notify remaining player
+    io.to(remainingPlayer.socketId).emit('duelResult', {
+      result: 'victory',
+      message: 'Your opponent left the duel. You win!',
+      ratingChange: winnerELO.ratingChange,
+      newRating: winnerELO.newRating,
+      reason: 'opponent_left'
+    });
+  }
+  
+  // Clean up
+  activeDuels.delete(roomId);
+  console.log(`Player left duel ${roomId}, room cleaned up`);
+});
 // Periodic matchmaking check (run every 10 seconds)
 setInterval(() => {
   if (duelQueue.length >= 2) {
@@ -519,434 +756,9 @@ setInterval(() => {
     }
   }
 }, 10000);
-  // Handle joining duel queue
-//   socket.on('joinDuelQueue', (userData) => {
-    
-//     console.log(`User ${userData.displayName} joining duel queue with ID: ${socket.id}`);
-    
-//     // Remove user from queue if already exists (prevent duplicates)
-//     const existingIndex = duelQueue.findIndex(entry => entry.socketId === socket.id);
-//     if (existingIndex > -1) {
-//       duelQueue.splice(existingIndex, 1);
-//     }
-    
-//     // Add user to queue
-//     const queueEntry = {
-//       socketId: socket.id,
-//       userId: userData.userId,
-//       displayName: userData.displayName,
-//       email: userData.email,
-//       profilePicture: userData.profilePicture,
-//       joinedAt: Date.now()
-//     };
-    
-//          duelQueue.push(queueEntry);
-//      console.log(`User ${userData.displayName} joined duel queue. Queue size: ${duelQueue.length}`);
-     
-//      // Emit queue status to user
-//      socket.emit('duelQueueStatus', { 
-//        position: duelQueue.length,
-//        inQueue: true,
-//        message: `You are in queue. Position: ${duelQueue.length}`
-//      });
-     
-//      console.log(`📋 Queue status sent to ${userData.displayName}: position ${duelQueue.length}`);
-    
-//     // Try to find a match
-//     if (duelQueue.length >= 2) {
-//       const player1 = duelQueue.shift();
-//       const player2 = duelQueue.shift();
-      
-//              const roomId = `duel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-       
-//               // Select random question from database (1-11 based on your existing questions)
-//        const questionId = Math.floor(Math.random() * 11) + 1;
-       
-//        // Create duel room
-//        activeDuels.set(roomId, {
-//          players: [player1, player2],
-//          status: 'starting',
-//          startTime: null,
-//          questionId: questionId,
-//          submissions: {},
-//          winner: null,
-//          createdAt: Date.now()
-//        });
-       
-//        console.log(`Duel match created: ${roomId} between ${player1.displayName} and ${player2.displayName}`);
-       
-//        // Notify both players with complete data
-//        io.to(player1.socketId).emit('duelMatchFound', { 
-//          roomId, 
-//          questionId: questionId,
-//          opponent: {
-//            displayName: player2.displayName,
-//            profilePicture: player2.profilePicture || '/placeholder-user.jpg'
-//          },
-//          message: `Match found! Preparing duel against ${player2.displayName}`
-//        });
-       
-//        io.to(player2.socketId).emit('duelMatchFound', { 
-//          roomId, 
-//          questionId: questionId,
-//          opponent: {
-//            displayName: player1.displayName,
-//            profilePicture: player1.profilePicture || '/placeholder-user.jpg'
-//          },
-//          message: `Match found! Preparing duel against ${player1.displayName}`
-//        });
-       
-//        console.log(`✅ Match notifications sent to both players`);
-//     }
-//   });
-
-//   // Handle leaving duel queue
-//   socket.on('leaveDuelQueue', () => {
-//     const index = duelQueue.findIndex(entry => entry.socketId === socket.id);
-//     if (index > -1) {
-//       const removed = duelQueue.splice(index, 1)[0];
-//       console.log(`User ${removed.displayName} left duel queue`);
-//       socket.emit('duelQueueStatus', { 
-//         inQueue: false,
-//         message: 'Left duel queue'
-//       });
-//     }
-//   });
-
-//      // Handle joining duel room
-//    socket.on('joinDuelRoom', async ({ roomId, user }) => {
-//      console.log('🏠 User joining duel room:', roomId, 'User:', user.displayName);
-//      socket.join(roomId);
-     
-//      const duel = activeDuels.get(roomId);
-//      if (duel) {
-//        console.log('📊 Sending game state update for room:', roomId);
-       
-//        // Transform backend player data to match frontend expectations
-//        const transformedPlayers = duel.players.map(player => ({
-//          userId: player.userId || player.socketId, // Use userId if available, fallback to socketId
-//          displayName: player.displayName,
-//          profilePicture: player.profilePicture || '/placeholder-user.jpg',
-//          ready: true // Set all players as ready
-//        }));
-       
-//        // Fetch question from database
-//        const questionData = await Question.findOne({ question_id: duel.questionId });
-       
-//        socket.emit('gameStateUpdate', {
-//          status: duel.status,
-//          players: transformedPlayers,
-//          timeLeft: 60,
-//          question: questionData
-//        });
-       
-//        // Check if both players have joined the room
-//        const playersInRoom = Array.from(io.sockets.adapter.rooms.get(roomId) || []).length;
-//        console.log(`👥 Players in room ${roomId}: ${playersInRoom}/2`);
-       
-//        if (duel.status === 'starting' && playersInRoom === 2) {
-//          console.log('🚀 Both players joined! Starting 3-second countdown...');
-         
-//          // Start 3-second countdown
-//          let countdown = 3;
-//          const countdownInterval = setInterval(() => {
-//            console.log(`⏰ Countdown: ${countdown}`);
-//            io.to(roomId).emit('gameStarting', countdown);
-//            countdown--;
-           
-//            if (countdown < 0) {
-//              clearInterval(countdownInterval);
-//              console.log('📖 Moving to question phase...');
-             
-//              // Move to question phase
-//              duel.status = 'question';
-//              io.to(roomId).emit('gameStateUpdate', {
-//                status: 'question',
-//                players: transformedPlayers,
-//                timeLeft: 10, // 10 seconds to read question
-//                question: questionData
-//              });
-             
-//              console.log('⏳ Starting 10-second question reading period...');
-//              // After 10 seconds, start the actual coding phase
-//              setTimeout(async () => {
-//                console.log('💻 Moving to active coding phase...');
-//                duel.status = 'active';
-//                duel.startTime = Date.now();
-               
-//                // Fetch question again for active phase
-//                const activeQuestionData = await Question.findOne({ question_id: duel.questionId });
-               
-//                io.to(roomId).emit('gameStateUpdate', {
-//                  status: 'active',
-//                  players: transformedPlayers,
-//                  timeLeft: 60,
-//                  question: activeQuestionData
-//                });
-               
-//                // Start 60-second timer
-//                startDuelTimer(roomId);
-//              }, 10000); // 10 seconds to read the question
-//            }
-//          }, 1000);
-//        }
-//      } else {
-//        console.log('❌ Duel room not found:', roomId);
-//        socket.emit('duelError', { message: 'Duel room not found' });
-//      }
-//    });
-
-//      // Handle duel code submission  
-//    socket.on('submitCode', async (data) => {
-//      const { roomId, source_code, language_id, userName } = data;
-     
-//      try {
-//        const duel = activeDuels.get(roomId);
-//        if (!duel || duel.status !== 'active') {
-//          socket.emit('duelError', { message: 'Duel is not active' });
-//          return;
-//        }
-
-//        console.log(`💻 Code submitted by ${userName} in room ${roomId}`);
-
-//        // Fetch the question from the database
-//        const questionData = await Question.findOne({ question_id: duel.questionId });
-       
-//        // For simplified testing, you can simulate the Judge0 submission
-//        // In a real implementation, you would prepare the test cases and submit to Judge0
-       
-//        // Simulate code checking (for testing - replace with actual Judge0 logic)
-//        const simulateResult = Math.random() > 0.3; // 70% chance of success for testing
-       
-//        if (simulateResult && !duel.winner) {
-//          // Player wins the duel!
-//          duel.status = 'finished';
-//          duel.winner = socket.id;
-         
-//          const winnerPlayer = duel.players.find(p => p.socketId === socket.id);
-//          const loserPlayer = duel.players.find(p => p.socketId !== socket.id);
-         
-//          console.log(`🏆 Duel ${roomId} won by ${winnerPlayer.displayName}`);
-         
-//          // Notify both players
-//          io.to(roomId).emit('gameFinished', {
-//            winner: {
-//              socketId: socket.id,
-//              displayName: winnerPlayer.displayName,
-//              userId: winnerPlayer.userId
-//            },
-//            loser: {
-//              socketId: loserPlayer.socketId,
-//              displayName: loserPlayer.displayName,
-//              userId: loserPlayer.userId
-//            },
-//            reason: 'solution_correct',
-//            message: `${winnerPlayer.displayName} solved the problem and won the duel!`
-//          });
-         
-//          // Update ratings (optional for now)
-//          // updateDuelRatings(winnerPlayer.userId, loserPlayer.userId, duel.question.question_id, roomId);
-         
-//          // Clean up
-//          setTimeout(() => {
-//            activeDuels.delete(roomId);
-//          }, 5000);
-         
-//        } else {
-//          socket.emit('results', {
-//            success: false,
-//            message: "Some test cases failed. Keep trying!",
-//            // results: mockResults // You can add mock test results here
-//          });
-//        }
-//      } catch (error) {
-//        console.error('Error processing duel submission:', error);
-//        socket.emit('duelError', { 
-//          message: 'Error processing submission', 
-//          error: error.message 
-//        });
-//      }
-//    });
-
-//   socket.on("disconnect", () => {
-//     console.log("A user disconnected:", socket.id);
-
-//     // Handle duel queue removal
-//     const queueIndex = duelQueue.findIndex(entry => entry.socketId === socket.id);
-//     if (queueIndex > -1) {
-//       const removed = duelQueue.splice(queueIndex, 1)[0];
-//       console.log(`Removed ${removed.displayName} from duel queue due to disconnect`);
-//     }
-    
-//     // Handle active duels
-//     for (const [roomId, duel] of activeDuels) {
-//       const playerIndex = duel.players.findIndex(p => p.socketId === socket.id);
-//       if (playerIndex > -1) {
-//         const disconnectedPlayer = duel.players[playerIndex];
-//         const otherPlayer = duel.players[1 - playerIndex];
-        
-//         console.log(`Player ${disconnectedPlayer.displayName} disconnected from duel ${roomId}`);
-        
-//         if (duel.status === 'active' && !duel.winner) {
-//           // Declare other player as winner
-//           duel.status = 'finished';
-//           duel.winner = otherPlayer.socketId;
-          
-//           io.to(otherPlayer.socketId).emit('duelFinished', {
-//             winner: {
-//               socketId: otherPlayer.socketId,
-//               displayName: otherPlayer.displayName,
-//               userId: otherPlayer.userId
-//             },
-//             loser: {
-//               socketId: disconnectedPlayer.socketId,
-//               displayName: disconnectedPlayer.displayName,
-//               userId: disconnectedPlayer.userId
-//             },
-//             reason: 'opponent_disconnected',
-//             message: `You won! ${disconnectedPlayer.displayName} disconnected.`
-//           });
-          
-//                      // Update ratings
-//            updateDuelRatings(otherPlayer.userId, disconnectedPlayer.userId, duel.questionId, roomId);
-//         }
-        
-//         activeDuels.delete(roomId);
-//         break;
-//       }
-//     }
-
-//     // Handle existing room system
-//     for (const roomId in rooms) {
-//       const room = rooms[roomId];
-//       const playerIndex = room.players.findIndex(
-//         (player) => player.id === socket.id
-//       );
-
-//       if (playerIndex !== -1) {
-//         // Get the player info before removing
-//         const disconnectedPlayer = room.players[playerIndex];
-        
-//         // Remove the disconnected player from the room
-//         room.players.splice(playerIndex, 1);
-        
-//         console.log(`Player ${disconnectedPlayer.name} disconnected from room ${roomId}`);
-//         console.log(`Room ${roomId} now has ${room.players.length}/${room.maxPlayers} players`);
-        
-//         // Notify remaining players with complete information
-//         socket.to(roomId).emit("playerDisconnected", { 
-//           playerId: socket.id,
-//           playerName: disconnectedPlayer.name,
-//           remainingPlayers: room.players,
-//           playerCount: room.players.length,
-//           maxPlayers: room.maxPlayers
-//         });
-
-//         // Check if there are any players left
-//         if (room.players.length === 0) {
-//           delete rooms[roomId];
-//           console.log(`Room ${roomId} has been deleted as all players disconnected.`);
-//         } 
-//         // If only one player remains, notify them they won by default
-//         else if (room.players.length === 1 && !room.winner) {
-//           const lastPlayer = room.players[0];
-//           room.winner = lastPlayer;
-          
-//           io.to(roomId).emit("gameResult", {
-//             winner: lastPlayer,
-//             message: `${lastPlayer.name} won the game because all other players disconnected!`
-//           });
-          
-//           console.log(`${lastPlayer.name} wins in room ${roomId} due to other players disconnecting`);
-//         }
-//         // If game continues but we need to update player count
-//         else {
-//           io.to(roomId).emit("playerCountUpdate", { 
-//             count: room.players.length, 
-//             maxPlayers: room.maxPlayers,
-//             players: room.players
-//           });
-//         }
-//         break;
-//       }
-//     }
-//   });
-// });
-
-// DUEL SYSTEM HELPER FUNCTIONS
-
-function startDuelTimer(roomId) {
-  let timeLeft = 60;
-  
-  const timer = setInterval(async () => {
-    timeLeft--;
-    
-    const duel = activeDuels.get(roomId);
-    if (!duel || duel.status !== 'active') {
-      clearInterval(timer);
-      return;
-    }
-    
-    // Transform players for frontend
-    const transformedPlayers = duel.players.map(player => ({
-      userId: player.userId || player.socketId,
-      displayName: player.displayName,
-      profilePicture: player.profilePicture || '/placeholder-user.jpg',
-      ready: true
-    }));
-    
-    // Fetch question data for timer updates
-    const questionData = await Question.findOne({ question_id: duel.questionId });
-    
-    io.to(roomId).emit('gameStateUpdate', {
-      status: 'active',
-      players: transformedPlayers,
-      timeLeft,
-      question: questionData
-    });
-    
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      
-      // Time's up - declare draw
-      duel.status = 'finished';
-      
-      io.to(roomId).emit('gameFinished', {
-        winner: null,
-        reason: 'timeout',
-        message: 'Time\'s up! The duel ended in a draw.',
-        players: transformedPlayers
-      });
-      
-      console.log(`Duel ${roomId} ended in timeout`);
-      
-      // Clean up after 5 seconds
-      setTimeout(() => {
-        activeDuels.delete(roomId);
-      }, 5000);
-    }
-  }, 1000);
+ 
 }
-
-async function updateDuelRatings(winnerUserId, loserUserId, questionId, matchId) {
-  try {
-    const { recordMatchResult } = await import('./Controllers/ratingController.js');
-    
-    await recordMatchResult({
-      participants: [
-        { userId: winnerUserId, result: 'win' },
-        { userId: loserUserId, result: 'loss' }
-      ],
-      questionId: questionId,
-      duration: 1, // Duel duration in minutes
-      matchType: 'duel'
-    });
-    
-    console.log(`Updated ratings for duel: winner ${winnerUserId}, loser ${loserUserId}`);
-  } catch (error) {
-    console.error('Error updating duel ratings:', error);
-  }
-}});
+);
 
 mongoose
   .connect(process.env.MONGODB_URL)

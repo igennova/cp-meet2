@@ -102,16 +102,15 @@ const checkSubmissionResults = async (
         const isCorrect = decodedStdout === expectedOutputs[index];
 
         return {
-          isCorrect: result.status.id === 3 ? isCorrect : null, // Only mark correct if status is 'Accepted'
+          isCorrect: result.status.id === 3 ? isCorrect : null, 
           output: decodedStdout,
           expected: expectedOutputs[index],
-          status: result.status?.description || "Unknown",
+          status: result.status?.description || "Unknown", 
           error:
             result.stderr || result.compile_output || result.message || null,
         };
       });
 
-      // Check if all submissions have completed processing
       const allProcessed = processedResults.every(
         (result) =>
           result.status !== "In Queue" && result.status !== "Processing"
