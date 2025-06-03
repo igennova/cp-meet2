@@ -9,7 +9,7 @@ import * as dotenv from "dotenv";
 import Question from "./Models/question.js";
 import session from "express-session";
 import passport from "passport";
-// import "./Controllers/passport-setup.js";
+import "./Controllers/passport-setup.js";
 import authRoutes from "./Routes/auth.js";
 import profileRoutes from "./Routes/profileRoutes.js";
 import corsMiddleware from "./middleware/cors.js";
@@ -19,32 +19,15 @@ import { UserRating } from "./Models/rating.js";
 
 import { submitCodeAndCheckResult } from "./Controllers/judge0.js";
 // import coderoutes from "./Routes/judgeRoutes.js";
-
-dotenv.config();
-
-// Connect to MongoDB first
-console.log('Connecting to MongoDB...');
-await mongoose
-    .connect(process.env.MONGODB_URL)
-    .then(() => console.log("MongoDB Connected Successfully"))
-    .catch((error) => {
-        console.error("MongoDB Connection error:", error);
-        process.exit(1); // Exit if MongoDB connection fails
-    });
-
-// Only import passport setup after MongoDB is connected
-import "./Controllers/passport-setup.js";
-// import authRoutes from "./Routes/auth.js";
-// import profileRoutes from "./Routes/profileRoutes.js";
-
 const app = express();
 app.use(express.json());
 const server = http.createServer(app);
+dotenv.config();
 const PORT = process.env.PORT || 5000;
 // Use middleware
 app.use(corsMiddleware);
 app.use(sessionMiddleware);
-app.use(passportMiddleware);
+passportMiddleware(app);
 const MAX_RATING_DIFFERENCE = 200;
 const RATING_TOLERANCE_INCREASE = 50;
 // Set up auth routes
@@ -66,19 +49,13 @@ app.get('/', (req, res) => {
   }
 });
 
-const allowedOrigins = [
-  "https://cp-buddy-t80e.onrender.com",
-  "http://localhost:3000",
-  "https://cp-nextjs-iota.vercel.app"
-];
-
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: ["https://cp-buddy-t80e.onrender.com","http://localhost:3000","https://cp-nextjs-iota.vercel.app"],
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   },
-  transports: ["websocket", "polling"]
+  transports: ["websocket", "polling"],
 });
 
 // Store game room status with added maxPlayers field
@@ -782,6 +759,11 @@ setInterval(() => {
  
 }
 );
+
+mongoose
+  .connect(process.env.MONGODB_URL)
+  .then(() => console.log("DB Connected"))
+  .catch((error) => console.error("Connection error:", error));
 
 server.listen(PORT, () => {
   console.log(`Server has started on http://localhost:${PORT}`);

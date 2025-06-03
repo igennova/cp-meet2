@@ -6,22 +6,16 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
-
 passport.serializeUser((user, done) => {
-    console.log('Serializing user:', user.id);
     done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
-    console.log('Deserializing user ID:', id);
     User.findById(id)
         .then(user => {
-            console.log('Found user:', user?.email);
             done(null, user);
         })
         .catch(err => {
-            console.error('Deserialize error:', err);
             done(err, null);
         });
 });
@@ -30,7 +24,7 @@ passport.use(
     new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${BASE_URL}/auth/google/callback`
+        callbackURL: '/auth/google/callback'
     }, async (accessToken, refreshToken, profile, done) => {
         try {
             // Check if user already exists

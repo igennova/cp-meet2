@@ -16,8 +16,6 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback', 
     passport.authenticate('google', { failureRedirect: `${CLIENT_URL}` }),
     (req, res) => {
-        console.log('Google auth callback - User:', req.user?.email);
-        console.log('Session:', req.session);
         // Redirect to frontend after authentication (success or failure)
         res.redirect(CLIENT_URL);
     }
@@ -25,10 +23,8 @@ router.get('/google/callback',
 
 // Auth logout
 router.get('/logout', (req, res) => {
-    console.log('Logout request for user:', req.user?.email);
     req.logout((err) => {
         if (err) {
-            console.error('Logout error:', err);
             return res.status(500).json({ error: 'Error logging out' });
         }
         res.redirect(CLIENT_URL);
@@ -37,8 +33,6 @@ router.get('/logout', (req, res) => {
 
 // Get current user
 router.get('/current_user', (req, res) => {
-    console.log('Current user request - Session:', req.session);
-    console.log('Current user request - User:', req.user);
     if (req.user) {
         res.json(req.user);
     } else {
