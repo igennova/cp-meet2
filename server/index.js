@@ -34,8 +34,8 @@ await mongoose
 
 // Only import passport setup after MongoDB is connected
 import "./Controllers/passport-setup.js";
-import authRoutes from "./Routes/auth.js";
-import profileRoutes from "./Routes/profileRoutes.js";
+// import authRoutes from "./Routes/auth.js";
+// import profileRoutes from "./Routes/profileRoutes.js";
 
 const app = express();
 app.use(express.json());
