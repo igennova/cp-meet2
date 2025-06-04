@@ -7,46 +7,32 @@ import ratingRoutes from "./Routes/ratingRoutes.js";
 import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import Question from "./Models/question.js";
-import session from "express-session";
-import passport from "passport";
-import "./Controllers/passport-setup.js";
 import authRoutes from "./Routes/auth.js";
 import profileRoutes from "./Routes/profileRoutes.js";
 import corsMiddleware from "./middleware/cors.js";
-import sessionMiddleware from "./middleware/session.js";
-import passportMiddleware from "./middleware/passport.js";
 import { UserRating } from "./Models/rating.js";
-
+import { verifyToken } from "./middleware/auth.js";
 import { submitCodeAndCheckResult } from "./Controllers/judge0.js";
-// import coderoutes from "./Routes/judgeRoutes.js";
+
 const app = express();
 app.use(express.json());
 const server = http.createServer(app);
 dotenv.config();
 const PORT = process.env.PORT || 5000;
+
 // Use middleware
 app.use(corsMiddleware);
-app.use(sessionMiddleware);
-passportMiddleware(app);
-const MAX_RATING_DIFFERENCE = 200;
-const RATING_TOLERANCE_INCREASE = 50;
+
 // Set up auth routes
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
 
 // Test route to verify authentication
-app.get('/', (req, res) => {
-  if (req.user) {
-    res.json({ 
-      message: 'You are logged in!',
-      user: req.user 
-    });
-  } else {
-    res.json({ 
-      message: 'Not logged in',
-      redirectTo: 'http://localhost:3000'
-    });
-  }
+app.get('/', verifyToken, (req, res) => {
+  res.json({ 
+    message: 'You are logged in!',
+    user: req.user 
+  });
 });
 
 const io = new Server(server, {
@@ -66,7 +52,8 @@ const duelQueue = [];
 const activeDuels = new Map();
 
 // Sample questions for duels
-
+const MAX_RATING_DIFFERENCE=200
+const RATING_TOLERANCE_INCREASE=50
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 

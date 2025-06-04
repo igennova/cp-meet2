@@ -1,31 +1,42 @@
 import User from '../Models/user.js';
-import { UserRating,Match } from '../Models/rating.js';
+import { UserRating, Match } from '../Models/rating.js';
 
 // Get user profile
 export const getProfile = async (req, res) => {
     try {
+        // Log the incoming request user object
+        console.log('Request user object:', req.user);
+        
+        if (!req.user || !req.user._id) {
+            console.error('No user ID in request:', req.user);
+            return res.status(401).json({ message: 'User ID not found in request' });
+        }
+
         // Get user profile data
         const user = await User.findById(req.user._id).select('-googleId');
         if (!user) {
+            console.error('User not found in database:', req.user._id);
             return res.status(404).json({ message: 'User not found' });
         }
 
+        console.log('Found user:', user);
+
         // Get user rating data
         const rating = await UserRating.findOne({ userId: req.user._id });
+        console.log('User rating data:', rating);
 
-        // Get recent matches, limit to 5
+        // Get recent matches
         const matches = await Match.find({ 
             'participants.userId': req.user._id 
         })
-        .populate('questionId', 'title difficulty') // Populate question details
+        .populate('questionId', 'title difficulty')
         .sort({ matchDate: -1 })
         .limit(5);
-        console.log(matches);
-        console.log(rating);
 
         // Combine all data into a single response object
         const response = {
             profile: {
+                id: user._id,
                 displayName: user.displayName,
                 email: user.email,
                 profilePicture: user.profilePicture,
@@ -34,12 +45,11 @@ export const getProfile = async (req, res) => {
             rating: rating ? {
                 currentRating: rating.ratings.BLITZ_2MIN.current,
                 peakRating: rating.ratings.BLITZ_2MIN.peak,
-                
-                wins: rating.wins,
-                losses: rating.losses,
-                winRate: rating.winRate,
-                draw: rating.draws,    
-                matchesPlayed: rating.matchesPlayed,
+                wins: rating.overall.wins,
+                losses: rating.overall.losses,
+                winRate: rating.overall.winRate,
+                draws: rating.overall.draws,
+                matchesPlayed: rating.ratings.BLITZ_2MIN.matches,
                 ratingHistory: rating.ratingHistory || []
             } : null,
             matchHistory: {
@@ -50,7 +60,11 @@ export const getProfile = async (req, res) => {
         res.json(response);
     } catch (error) {
         console.error('Error in getProfile:', error);
-        res.status(500).json({ message: 'Error fetching profile', error: error.message });
+        res.status(500).json({ 
+            message: 'Error fetching profile', 
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 // Update user profile - handles all profile updates

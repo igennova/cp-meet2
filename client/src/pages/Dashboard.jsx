@@ -105,6 +105,42 @@ const Dashboard = () => {
     { message: "You defeated @CodeNinja in a JavaScript duel!", time: "3 days ago", type: "win" }
   ];
 
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_ENV === 'production' 
+        ? process.env.NEXT_PUBLIC_PROD_API_URL 
+        : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+      // Log the token to make sure it exists
+      console.log('Token:', token);
+
+      const response = await fetch(`${apiUrl}/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Profile fetch error:', errorData);
+        throw new Error(errorData.message || 'Failed to fetch profile');
+      }
+
+      const data = await response.json();
+      console.log('Profile data:', data);
+      // Set your profile data here
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      // Handle error appropriately
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#e0e0e0] py-8">
       {/* Carbon fiber texture overlay */}

@@ -1,13 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin as GoogleLoginButton } from '@react-oauth/google';
 
 const GoogleLogin = () => {
-  const { user, logout, loading } = useAuth();
-
-  const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:5000/auth/google';
-  };
+  const { user, logout, loading, loginWithGoogle } = useAuth();
 
   if (loading) {
     return (
@@ -40,17 +37,14 @@ const GoogleLogin = () => {
   }
 
   return (
-    <Button
-      onClick={handleGoogleLogin}
-      className="flex items-center gap-2 bg-white text-gray-700 hover:bg-gray-100"
-    >
-      <img 
-        src="https://www.google.com/favicon.ico" 
-        alt="Google" 
-        className="w-5 h-5"
-      />
-      Sign in with Google
-    </Button>
+    <GoogleLoginButton
+      onSuccess={credentialResponse => {
+        loginWithGoogle(credentialResponse.credential);
+      }}
+      onError={() => {
+        console.log('Login Failed');
+      }}
+    />
   );
 };
 

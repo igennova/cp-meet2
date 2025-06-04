@@ -7,6 +7,8 @@ import { Navbar } from "@/components";
 import { Button, Input, HyperText, GradualSpacing } from "@/components/ui";
 import { Home } from "@/pages";
 import { Dashboard } from "@/pages";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthProvider } from './context/AuthContext';
 
 // Initialize socket outside of component to avoid reconnections
 const socket = io("https://cp-buddy-4ngv.onrender.com");
@@ -188,49 +190,53 @@ const App = () => {
   };
 
   return (
-    <BrowserRouter>
-      <Navbar
-        isMatched={isMatched}
-        timeup={timeup}
-        formatTime={formatTime}
-        time={time}
-        playerCount={playerCount}
-        maxPlayers={maxPlayers}
-      />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Navbar
+            isMatched={isMatched}
+            timeup={timeup}
+            formatTime={formatTime}
+            time={time}
+            playerCount={playerCount}
+            maxPlayers={maxPlayers}
+          />
 
-      <ToastContainer position="top-right" theme="dark" />
+          <ToastContainer position="top-right" theme="dark" />
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              timeup={timeup}
-              isMatched={isMatched}
-              userName={userName}
-              setUserName={setUserName}
-              roomId={roomId}
-              setRoomId={setRoomId}
-              isRoomCreated={isRoomCreated}
-              isRoomJoined={isRoomJoined}
-              gameMessage={gameMessage}
-              createRoom={createRoom}
-              joinRoom={joinRoom}
-              socket={socket}
-              setTimerRunning={setTimerRunning}
-              timerRunning={timerRunning}
-              maxPlayers={maxPlayers}
-              setMaxPlayers={setMaxPlayers}
-              playerCount={playerCount}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Home
+                  timeup={timeup}
+                  isMatched={isMatched}
+                  userName={userName}
+                  setUserName={setUserName}
+                  roomId={roomId}
+                  setRoomId={setRoomId}
+                  isRoomCreated={isRoomCreated}
+                  isRoomJoined={isRoomJoined}
+                  gameMessage={gameMessage}
+                  createRoom={createRoom}
+                  joinRoom={joinRoom}
+                  socket={socket}
+                  setTimerRunning={setTimerRunning}
+                  timerRunning={timerRunning}
+                  maxPlayers={maxPlayers}
+                  setMaxPlayers={setMaxPlayers}
+                  playerCount={playerCount}
+                />
+              }
             />
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
-      </Routes>
-    </BrowserRouter>
+            <Route
+              path="/dashboard"
+              element={<Dashboard />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 };
 
