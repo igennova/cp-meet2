@@ -302,7 +302,7 @@ io.on("connection", (socket) => {
   });
 const RATING_RANGES = {
   BEGINNER: { min: 0, max: 1000, difficulty: 'easy' },
-  INTERMEDIATE: { min: 1001, max: 2000, difficulty: 'medium' },
+  INTERMEDIATE: { min: 1200, max: 2000, difficulty: 'medium' },
   ADVANCED: { min: 2001, max: 3000, difficulty: 'hard' },
   EXPERT: { min: 3001, max: 4000, difficulty: 'expert' },
   MASTER: { min: 4001, max: 5000, difficulty: 'master' }
