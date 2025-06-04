@@ -314,7 +314,7 @@ const RATING_RANGES = {
       return { level, difficulty: range.difficulty };
     }
   }
-  return { level: 'BEGINNER', difficulty: 'easy' }; // default
+  return { level: 'BEGINNER', difficulty: 'easy' }; // defaul
 };
 
 // Find suitable match based on rating
