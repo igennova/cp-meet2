@@ -51,6 +51,17 @@ const rooms = {};
 const duelQueue = [];
 const activeDuels = new Map();
 
+// Add bot configuration
+const TEST_BOT = {
+  socketId: "bot_socket_id",
+  userId: "bot_user_id",
+  displayName: "CP Bot",
+  email: "bot@cpbuddy.com",
+  profilePicture: "/bot-avatar.png",
+  rating: 1000, // Medium level bot
+  isBot: true,
+};
+
 // Sample questions for duels
 const MAX_RATING_DIFFERENCE=200
 const RATING_TOLERANCE_INCREASE=50
@@ -411,15 +422,18 @@ socket.on('joinDuelQueue', async (userData) => {
     console.log(`User ${userData.displayName} joining duel queue with ID: ${socket.id}`);
     console.log(`User data: ${JSON.stringify(userData)}`);
     
-    // Fetch user's current rating from database
-    const userFromDB = await UserRating.findOne({ userId: userData.userId });
-    console.log(`Fetched user from DB: ${JSON.stringify(userFromDB)}`);
-    if (!userFromDB) {
-      socket.emit('error', { message: 'User not found' });
-      return;
+    // For testing purposes, we'll use a fixed rating if it's not available
+    let userRating = 1500; // Default rating
+    
+    try {
+      const userFromDB = await UserRating.findOne({ userId: userData.userId });
+      if (userFromDB) {
+        userRating = userFromDB.ratings.BLITZ_2MIN.current;
+      }
+    } catch (error) {
+      console.log('Error fetching rating, using default:', error);
     }
     
-    const userRating = userFromDB.ratings.BLITZ_2MIN.current;
     console.log(`User ${userData.displayName} has rating: ${userRating}`);
     
     // Remove user from queue if already exists (prevent duplicates)
@@ -438,25 +452,21 @@ socket.on('joinDuelQueue', async (userData) => {
       rating: userRating,
       joinedAt: Date.now()
     };
-    console.log(queueEntry)
-    // Try to find a suitable match first
-    const matchedPlayer = findSuitableMatch(queueEntry, duelQueue);
-    
-    if (matchedPlayer) {
-      // Match found immediately
-      console.log(`Immediate match found between ${queueEntry.displayName} (${queueEntry.rating}) and ${matchedPlayer.displayName} (${matchedPlayer.rating})`);
-      
+
+    // Check if queue is empty - if so, match with bot
+    if (duelQueue.length === 0) {
+      console.log('Queue empty, matching with bot');
       const roomId = `duel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      // Get appropriate question based on both players' ratings
-      const selectedQuestion = await getQuestionForDuel(queueEntry.rating, matchedPlayer.rating);
+      // Get appropriate question based on both ratings
+      const selectedQuestion = await getQuestionForDuel(queueEntry.rating, TEST_BOT.rating);
       console.log(`Selected question ID: ${selectedQuestion}`);
-      const avgRating = (queueEntry.rating + matchedPlayer.rating) / 2;
+      const avgRating = (queueEntry.rating + TEST_BOT.rating) / 2;
       const { difficulty } = getRatingInfo(avgRating);
       
-      // Create duel room
+      // Create duel room with bot
       activeDuels.set(roomId, {
-        players: [matchedPlayer, queueEntry],
+        players: [queueEntry, TEST_BOT],
         status: 'starting',
         startTime: null,
         questionId: selectedQuestion,
@@ -467,50 +477,45 @@ socket.on('joinDuelQueue', async (userData) => {
         createdAt: Date.now()
       });
       
-      console.log(`Duel created: ${roomId}, Question: ${selectedQuestion._id}, Difficulty: ${difficulty}, Avg Rating: ${avgRating}`);
+      console.log(`Duel created with bot: ${roomId}, Question: ${selectedQuestion}, Difficulty: ${difficulty}`);
       
-      // Notify both players
-      const matchData1 = {
+      // Notify the real player about the match
+      const matchData = {
         roomId,
         questionId: selectedQuestion,
         difficulty: difficulty,
         opponent: {
-          displayName: queueEntry.displayName,
-          profilePicture: queueEntry.profilePicture || '/placeholder-user.jpg',
-          rating: queueEntry.rating
-        },
-        yourRating: matchedPlayer.rating,
-        message: `Match found! Duel vs ${queueEntry.displayName} (${queueEntry.rating})`
-      };
-      
-      const matchData2 = {
-        roomId,
-        questionId: selectedQuestion,
-        difficulty: difficulty,
-        opponent: {
-          displayName: matchedPlayer.displayName,
-          profilePicture: matchedPlayer.profilePicture || '/placeholder-user.jpg',
-          rating: matchedPlayer.rating
+          displayName: TEST_BOT.displayName,
+          profilePicture: TEST_BOT.profilePicture,
+          rating: TEST_BOT.rating,
+          isBot: true
         },
         yourRating: queueEntry.rating,
-        message: `Match found! Duel vs ${matchedPlayer.displayName} (${matchedPlayer.rating})`
+        message: `Match found! Duel vs ${TEST_BOT.displayName} (${TEST_BOT.rating})`
       };
       
-      io.to(matchedPlayer.socketId).emit('duelMatchFound', matchData1);
-      io.to(queueEntry.socketId).emit('duelMatchFound', matchData2);
+      io.to(queueEntry.socketId).emit('duelMatchFound', matchData);
       
     } else {
-      // No immediate match, add to queue
-      duelQueue.push(queueEntry);
-      console.log(`User ${userData.displayName} (Rating: ${userRating}) added to queue. Queue size: ${duelQueue.length}`);
+      // Try to find a human player first
+      const matchedPlayer = findSuitableMatch(queueEntry, duelQueue);
       
-      // Emit queue status
-      socket.emit('duelQueueStatus', {
-        position: duelQueue.length,
-        inQueue: true,
-        rating: userRating,
-        message: `Searching for opponent near your rating (${userRating})...`
-      });
+      if (matchedPlayer) {
+        // Normal human player matching logic
+        // ... existing match found code ...
+      } else {
+        // No human player found, add to queue
+        duelQueue.push(queueEntry);
+        console.log(`User ${userData.displayName} (Rating: ${userRating}) added to queue. Queue size: ${duelQueue.length}`);
+        
+        // Emit queue status
+        socket.emit('duelQueueStatus', {
+          position: duelQueue.length,
+          inQueue: true,
+          rating: userRating,
+          message: `Searching for opponent near your rating (${userRating})...`
+        });
+      }
     }
     
   } catch (error) {
@@ -526,7 +531,52 @@ socket.on('submitDuelCode', async ({ problem_id, source_code, language_id, roomI
       socket.emit('error', { message: 'Duel room not found' });
       return;
     }
-    
+
+    // Check if this is a duel with a bot
+    const isVsBot = duel.players.some(p => p.isBot);
+    if (isVsBot) {
+      // Simulate bot taking time to solve
+      const botThinkTime = Math.random() * (20000 - 5000) + 5000; // Random time between 5-20 seconds
+      
+      setTimeout(() => {
+        // 70% chance for bot to fail
+        const botFails = Math.random() < 0.7;
+        
+        if (!duel.winner) { // Only proceed if there's no winner yet
+          if (botFails) {
+            // Bot failed - notify the player
+            io.to(socket.id).emit('botAttempt', {
+              message: 'CP Bot failed to solve the problem!',
+              success: false
+            });
+          } else {
+            // Bot succeeded - set bot as winner if player hasn't won yet
+            duel.winner = {
+              id: TEST_BOT.socketId,
+              userId: TEST_BOT.userId,
+              name: TEST_BOT.displayName,
+              rating: TEST_BOT.rating,
+              isBot: true
+            };
+            
+            // Notify the player about bot's victory
+            io.to(socket.id).emit('duelResult', {
+              result: 'defeat',
+              message: 'CP Bot solved the problem first!',
+              winner: {
+                name: TEST_BOT.displayName,
+                isBot: true
+              },
+              // No rating changes for bot matches
+              ratingChange: 0,
+              newRating: duel.players.find(p => !p.isBot).rating
+            });
+          }
+        }
+      }, botThinkTime);
+    }
+
+    // Continue with normal submission logic
     if (!problem_id || !source_code || !language_id) {
       socket.emit('error', {
         message: 'Missing problem_id, source_code, or language_id',
@@ -601,55 +651,66 @@ socket.on('submitDuelCode', async ({ problem_id, source_code, language_id, roomI
       const winner = currentPlayer;
       const loser = duel.players.find(player => player.socketId !== socket.id);
       
-      // Calculate ELO rating changes
-      const winnerELO = calculateELO(winner.rating, loser.rating, true);
-      const loserELO = calculateELO(loser.rating, winner.rating, false);
-      
-      console.log(`Duel completed! Winner: ${userName}`);
-      console.log(`Rating changes - Winner: ${winner.rating} -> ${winnerELO.newRating} (${winnerELO.ratingChange >= 0 ? '+' : ''}${winnerELO.ratingChange})`);
-      console.log(`Rating changes - Loser: ${loser.rating} -> ${loserELO.newRating} (${loserELO.ratingChange >= 0 ? '+' : ''}${loserELO.ratingChange})`);
-      
-      // Update ratings in database
-      await updateUserRating(winner.userId, winnerELO.newRating, winnerELO.ratingChange);
-      await updateUserRating(loser.userId, loserELO.newRating, loserELO.ratingChange);
-      
-      // Emit game result to both players
-      const gameResult = {
-        winner: {
-          name: userName,
-          userId: winner.userId,
-          oldRating: winner.rating,
-          newRating: winnerELO.newRating,
-          ratingChange: winnerELO.ratingChange
-        },
-        loser: {
-          name: loser.displayName,
-          userId: loser.userId,
-          oldRating: loser.rating,
-          newRating: loserELO.newRating,
-          ratingChange: loserELO.ratingChange
-        },
-        duelId: roomId,
-        completedAt: Date.now()
-      };
-      
-      // Send detailed results to winner
-      io.to(socket.id).emit('duelResult', {
-        ...gameResult,
-        result: 'victory',
-        message: `Congratulations! You won the duel!`,
-        ratingChange: winnerELO.ratingChange,
-        newRating: winnerELO.newRating
-      });
-      
-      // Send detailed results to loser
-      io.to(loser.socketId).emit('duelResult', {
-        ...gameResult,
-        result: 'defeat',
-        message: `${userName} solved the problem first!`,
-        ratingChange: loserELO.ratingChange,
-        newRating: loserELO.newRating
-      });
+      // Skip rating changes if playing against bot
+      if (!loser.isBot) {
+        // Calculate ELO rating changes
+        const winnerELO = calculateELO(winner.rating, loser.rating, true);
+        const loserELO = calculateELO(loser.rating, winner.rating, false);
+        
+        // Update ratings in database
+        await updateUserRating(winner.userId, winnerELO.newRating, winnerELO.ratingChange);
+        await updateUserRating(loser.userId, loserELO.newRating, loserELO.ratingChange);
+        
+        // Emit game result to both players with rating changes
+        const gameResult = {
+          winner: {
+            name: userName,
+            userId: winner.userId,
+            oldRating: winner.rating,
+            newRating: winnerELO.newRating,
+            ratingChange: winnerELO.ratingChange
+          },
+          loser: {
+            name: loser.displayName,
+            userId: loser.userId,
+            oldRating: loser.rating,
+            newRating: loserELO.newRating,
+            ratingChange: loserELO.ratingChange
+          },
+          duelId: roomId,
+          completedAt: Date.now()
+        };
+        
+        // Send detailed results to both players
+        io.to(socket.id).emit('duelResult', {
+          ...gameResult,
+          result: 'victory',
+          message: `Congratulations! You won the duel!`,
+          ratingChange: winnerELO.ratingChange,
+          newRating: winnerELO.newRating
+        });
+        
+        io.to(loser.socketId).emit('duelResult', {
+          ...gameResult,
+          result: 'defeat',
+          message: `${userName} solved the problem first!`,
+          ratingChange: loserELO.ratingChange,
+          newRating: loserELO.newRating
+        });
+      } else {
+        // Bot match - no rating changes
+        io.to(socket.id).emit('duelResult', {
+          result: 'victory',
+          message: 'Congratulations! You beat the CP Bot!',
+          winner: {
+            name: userName,
+            userId: winner.userId,
+          },
+          ratingChange: 0,
+          newRating: winner.rating,
+          isBot: true
+        });
+      }
       
       // Clean up the duel after a delay
       setTimeout(() => {
